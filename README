@@ -1,34 +1,69 @@
+Document info
+------
+Author: Nathan Rousselot
+Date: 5th March 2019
+------
+Software info
+------
+Version: 0.1 (stable)
+Kernel: 4.99.1428
+------
+
+
 ----------------------------------------------------------------------
-1.  Overview
+1.  Abstract
 ----------------------------------------------------------------------
 
-a.  Opencpn was built with the following objectives in mind.
+NavalCPN is a modified version of OpenCPN. Keep in mind that
+the kernel of this project is OpenCPN, and we owe them a lot
+of credits for this.
+OpenCPN is an Open-Sourced project, so is NavalCPN. As it is
+under GPLv3, you can freely download the source and reuse it
+at other purpose. There are, however, few conditions to follow
+and you can find them in the LICENSE file.
 
-    i.   Intended use as primary navigation interface for vessels
-         with full-time helm-visible navigational suites.
-         Other tools may be better for offline route planning, tide
-         and current prediction, online logging, etc.
-    ii.  Quick startup and shutdown.
-    iii. Those and only those toolbar buttons really needed for
-         daily operation.
-    iv.  Portability, thus wxWidgets core components.  Currently
-         tested and in production use on Windows XP-8.1, OS X, and Linux.
-    v.   Conventional ( i.e. popular and modern ) chart format
-         support.  In the real world, this means BSB format raster
-         charts, and S57ENC format vector charts.
+----------------------------------------------------------------------
+2.  Overview
+----------------------------------------------------------------------
 
+NavalCPN is a tool which is part of a series of hardware and
+software modules developped by Naval Instruments.
+This software will allow you to ease your sailing experience.
+Thanks to the hardware provided by NI, you will be able to
+get a deeper overview of your boat than with regular OpenCPN.
 
+----------------------------------------------------------------------
+3.  Update Policy
+----------------------------------------------------------------------
 
-        And, of course, opencpn is all GPL'ed (or equivalent)
-                        Open Source code.
+As NavalCPN is clearly distinct from OpenCPN, there might be
+few differences when it comes to stability, features, and look
+of the software. Naval Instruments tries its best to keep the
+kernel Up-To-Date with OpenCPN's releases. It may also happen
+that NavalCPN's Kernel is in advance compare to last OpenCPN
+release, which might cause stability issues.
+The process of upgrading the kernel, while keeping the modifications
+can be long and tedious. Thus feel free to help the good cause,
+it's an Open-Sourced project after all!
 
+----------------------------------------------------------------------
+4.  Warning
+----------------------------------------------------------------------
 
-    Personal Note:
-    Opencpn is in primary daily use as the navigation package aboard
-    M/V Dyad, a 48 ft trawler yacht cruising from Newfoundland to the
-    Bahamas yearly.
+NavalCPN is not a complete replacement to traditionnal ways of
+sailing. Naval Instruments cannot be charged for accident that
+happened while using NavalCPN, nor OpenCPN. We assume that you
+know how a sailboat works, and that you are responsible of your
+acts.
 
-    Our thanks go to MAXCDN for providing a CDN network delivering
-    the OpenCPN downloads worldwide.
+----------------------------------------------------------------------
+5.  Thanks
+----------------------------------------------------------------------
 
-    OpenCPN is distributed using a multitude of licenses, see LICENSING.
+Thank you for having read this README file. We would like to
+thank the two organizations that help us in this adventure:
+  - Efrei Paris Entrepreneurs
+  - Ecole Nationale D'Ingénieurs de Brest (ENIB)
+
+Find out more about Naval Instruments on our website:
+  http://naval-instruments.ml
