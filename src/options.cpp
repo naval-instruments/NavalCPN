@@ -323,6 +323,7 @@ extern wxString g_default_routepoint_icon;
 extern int      g_iWpt_ScaMin;
 extern bool     g_bUseWptScaMin;
 bool            g_bOverruleScaMin;
+extern int      osMajor, osMinor;
 
 extern "C" bool CheckSerialAccess(void);
 extern  wxString GetShipNameFromFile(int);
@@ -705,7 +706,7 @@ void MMSIEditDialog::OnMMSIEditOKClick(wxCommandEvent& event) {
     long nmmsi;
     m_MMSICtl->GetValue().ToLong(&nmmsi);
     m_props->MMSI = nmmsi;
-
+    Persist();
     
       
     if (m_MMSICtl->GetValue().Length() != 9)
@@ -3578,12 +3579,14 @@ void options::CreatePanel_Advanced(size_t parent, int border_size,
 //     pConfirmObjectDeletion->SetValue(FALSE);
 //     boxCtrls->Add(pConfirmObjectDeletion, inputFlags);
 
+/*    
     pTransparentToolbar =
         new wxCheckBox(m_ChartDisplayPage, ID_TRANSTOOLBARCHECKBOX,
                        _("Enable Transparent Toolbar"));
     itemBoxSizerUI->Add(pTransparentToolbar, 0, wxALL, border_size);
     if (g_bopengl && !g_bTransparentToolbarInOpenGLOK)
       pTransparentToolbar->Disable();
+*/
 
     itemBoxSizerUI->Add(0, border_size * 3);
     itemBoxSizerUI->Add(0, border_size * 3);
@@ -3849,12 +3852,14 @@ With a higher value, the same zoom level shows a more detailed chart."));
     bOpenGL->Enable(!g_bdisable_opengl);
 
     itemBoxSizerUI->Add(0, border_size * 3);
+/*    
     pTransparentToolbar =
         new wxCheckBox(m_ChartDisplayPage, ID_TRANSTOOLBARCHECKBOX,
                        _("Enable Transparent Toolbar"));
     itemBoxSizerUI->Add(pTransparentToolbar, 0, wxALL, border_size);
     if (g_bopengl && !g_bTransparentToolbarInOpenGLOK)
       pTransparentToolbar->Disable();
+*/    
   }
 }
 
@@ -5352,6 +5357,8 @@ void options::CreatePanel_UI(size_t parent, int border_size, int group_item_spac
   pDarkDecorations = new wxCheckBox(itemPanelFont, ID_DARKDECORATIONSBOX,
                                   _("Use dark window decorations"));
   miscOptions->Add(pDarkDecorations, 0, wxALL, border_size);
+  pDarkDecorations->Enable( (osMajor >= 10) && (osMinor >= 12) );
+ 
 #endif
     
   miscOptions->AddSpacer(10);
@@ -5374,7 +5381,7 @@ void options::CreatePanel_UI(size_t parent, int border_size, int group_item_spac
   sliderSizer->Add(m_pSlider_GUI_Factor, 0, wxALL, border_size);
   m_pSlider_GUI_Factor->Show();
 
-#ifdef __OCPN_ANDROID__
+#ifdef __OCPN__ANDROID__
   m_pSlider_GUI_Factor->GetHandle()->setStyleSheet(getQtStyleSheet());
 #endif
 
@@ -5388,7 +5395,7 @@ void options::CreatePanel_UI(size_t parent, int border_size, int group_item_spac
   sliderSizer->Add(m_pSlider_Chart_Factor, 0, wxALL, border_size);
   m_pSlider_Chart_Factor->Show();
 
-#ifdef __OCPN_ANDROID____
+#ifdef __OCPN__ANDROID__
   m_pSlider_Chart_Factor->GetHandle()->setStyleSheet(getQtStyleSheet());
 #endif
 
@@ -5402,7 +5409,7 @@ void options::CreatePanel_UI(size_t parent, int border_size, int group_item_spac
   sliderSizer->Add(m_pSlider_Ship_Factor, 0, wxALL, border_size);
   m_pSlider_Ship_Factor->Show();
   
-#ifdef __OCPN_ANDROID____
+#ifdef __OCPN__ANDROID__
   m_pSlider_Ship_Factor->GetHandle()->setStyleSheet(getQtStyleSheet());
 #endif
   miscOptions->Add( sliderSizer, 0, wxEXPAND, 5 );
@@ -5985,7 +5992,7 @@ void options::SetInitialSettings(void) {
   if (pSoundDeviceIndex)
       pSoundDeviceIndex->SetSelection(g_iSoundDeviceIndex);
   //    pFullScreenToolbar->SetValue( g_bFullscreenToolbar );
-  pTransparentToolbar->SetValue(g_bTransparentToolbar);
+  //pTransparentToolbar->SetValue(g_bTransparentToolbar);
   pSDMMFormat->Select(g_iSDMMFormat);
   pDistanceFormat->Select(g_iDistanceFormat);
   pSpeedFormat->Select(g_iSpeedFormat);
@@ -6429,8 +6436,8 @@ void options::OnWaypointRangeRingSelect(wxCommandEvent& event) {
 }
 
 void options::OnGLClicked(wxCommandEvent& event) {
-  if (!g_bTransparentToolbarInOpenGLOK)
-    pTransparentToolbar->Enable(!pOpenGL->GetValue());
+//   if (!g_bTransparentToolbarInOpenGLOK)
+//     pTransparentToolbar->Enable(!pOpenGL->GetValue());
 }
 
 void options::OnOpenGLOptions(wxCommandEvent& event) {
@@ -7083,7 +7090,7 @@ void options::OnApplyClick(wxCommandEvent& event) {
   g_bPlayShipsBells = pPlayShipsBells->GetValue();
   if (pSoundDeviceIndex)
       g_iSoundDeviceIndex = pSoundDeviceIndex->GetSelection();
-  g_bTransparentToolbar = pTransparentToolbar->GetValue();
+  //g_bTransparentToolbar = pTransparentToolbar->GetValue();
   g_iSDMMFormat = pSDMMFormat->GetSelection();
   g_iDistanceFormat = pDistanceFormat->GetSelection();
   g_iSpeedFormat = pSpeedFormat->GetSelection();
@@ -8188,11 +8195,21 @@ void options::OnButtonSelectSound(wxCommandEvent& event) {
   }
 }
 
+OcpnSound *ptest_sound;
+
+static void onTestSoundFinished(void* ptr)
+{
+    auto poptions = static_cast<options*>(ptr);
+}
+
 void options::OnButtonTestSound(wxCommandEvent& event) {
-    std::unique_ptr<OcpnSound> AIS_Sound(SoundFactory());
-    AIS_Sound->SetCmd( g_CmdSoundString.mb_str( wxConvUTF8 ) );
-    AIS_Sound->Load(g_sAIS_Alert_Sound_File, g_iSoundDeviceIndex);
-    AIS_Sound->Play();
+    ptest_sound = SoundFactory();
+    ptest_sound->SetCmd( g_CmdSoundString.mb_str( wxConvUTF8 ) );
+#ifdef ocpnARM
+    ptest_sound->SetFinishedCallback( onTestSoundFinished, this );
+#endif    
+    ptest_sound->Load(g_sAIS_Alert_Sound_File, g_iSoundDeviceIndex);
+    ptest_sound->Play();
 }
 
 

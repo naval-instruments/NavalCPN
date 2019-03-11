@@ -88,6 +88,8 @@
 #include <gdk/gdk.h>
 #endif
 
+#include <cstdlib>
+
 DECLARE_APP(MyApp)
 
 void appendOSDirSlash( wxString* pString );
@@ -130,7 +132,6 @@ extern int                       g_nAWMax;
 extern bool                      g_bPlayShipsBells;
 extern bool                      g_bFullscreenToolbar;
 extern bool                      g_bShowLayers;
-extern bool                      g_bTransparentToolbar;
 extern bool                      g_bPermanentMOBIcon;
 extern bool                      g_bTempShowMenuBar;
 extern float                     g_toolbar_scalefactor;
@@ -583,10 +584,15 @@ void OCPNPlatform::Initialize_2( void )
 //  Called from MyApp()::OnInit() just after gFrame is created, so gFrame is available
 void OCPNPlatform::Initialize_3( void )
 {
+    
     bool bcapable = IsGLCapable();
+
+#ifdef ocpnARM         // Boot arm* platforms (meaning rPI) without OpenGL on first run
+    bcapable = false;
+#endif    
     
     // Try to automatically switch to guaranteed usable GL mode on an OCPN upgrade or fresh install
-    
+
     if( (g_bFirstRun || g_bUpgradeInProcess) && bcapable){
         g_bopengl = true;
         
@@ -602,7 +608,7 @@ void OCPNPlatform::Initialize_3( void )
         g_GLOptions.m_GLLineSmoothing = true;
 
     }
-    
+
     gFrame->SetGPSCompassScale();
 }
 
@@ -1038,7 +1044,7 @@ void OCPNPlatform::SetDefaultOptions( void )
     }
 #endif
 
-#ifdef __LINUX__
+#ifdef __linux__
 //  Enable some default PlugIns, and their default options
     if(pConfig){
         pConfig->SetPath( _T ( "/PlugIns/libchartdldr_pi.so" ) );
@@ -1751,7 +1757,15 @@ double  OCPNPlatform::GetDisplaySizeMM()
     
 #ifdef __WXGTK__
     GdkScreen *screen = gdk_screen_get_default();
-    double gdk_monitor_mm = gdk_screen_get_width_mm(screen);
+    wxSize resolution = getDisplaySize();
+    double gdk_monitor_mm;
+    double ratio = (double)resolution.GetWidth() / (double)resolution.GetHeight();
+    if( std::abs(ratio - 32.0/10.0) < std::abs(ratio - 16.0/10.0) ) {
+        // We suspect that when the resolution aspect ratio is closer to 32:10 than 16:10, there are likely 2 monitors side by side. This works nicely when they are landscape, but what if both are rotated 90 degrees...
+        gdk_monitor_mm = gdk_screen_get_width_mm(screen);
+    } else {
+        gdk_monitor_mm = gdk_screen_get_monitor_width_mm(screen, 0);
+    }
     if(gdk_monitor_mm > 0) // if gdk detects a valid screen width (returns -1 on raspberry pi)
         ret = gdk_monitor_mm;
 #endif    
@@ -2286,7 +2300,7 @@ void OCPNPlatform::setChartTypeMaskSel(int mask, wxString &indicator)
     
 }
 
-#ifdef __OCPN_ANDROID__
+#ifdef __OCPN__ANDROID__
 QString g_qtStyleSheet;
 
 bool LoadQtStyleSheet(wxString &sheet_file)

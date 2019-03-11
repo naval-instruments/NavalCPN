@@ -292,6 +292,7 @@ ChartMBTiles::ChartMBTiles()
       m_pCOVRTable = NULL;
       m_pNoCOVRTablePoints = NULL;
       m_pNoCOVRTable = NULL;
+      m_tileArray = NULL;
     
       m_LonMin = LON_UNDEF;
       m_LonMax = LON_UNDEF;
@@ -527,9 +528,9 @@ InitReturn ChartMBTiles::Init( const wxString& name, ChartInitFlag init_flags )
       InitFromTiles(name);
  
  
-      // set the chart scale parameters based on the minzoom factor
+      // set the chart scale parameters based on the max zoom factor
       m_ppm_avg = 1.0 / OSM_zoomMPP[m_minZoom];
-      m_Chart_Scale = OSM_zoomScale[m_minZoom];
+      m_Chart_Scale = OSM_zoomScale[m_maxZoom];
       
 
       PrepareTiles();           // Initialize the tile data structures
@@ -595,18 +596,21 @@ InitReturn ChartMBTiles::Init( const wxString& name, ChartInitFlag init_flags )
          }     // inner while
       
          wxRegionIterator upd( regionZoom ); // get the  rect list
+         double eps_factor = eps * 100;         // roughly 1 m
+         
          while( upd ) {
             wxRect rect = upd.GetRect();
 
-            double lonmin = round(tilex2long(rect.x, zoomFactor)/eps)*eps;
-            double lonmax = round(tilex2long(rect.x + rect.width, zoomFactor)/eps)*eps;
-            double latmin = round(tiley2lat(rect.y, zoomFactor)/eps)*eps;
-            double latmax = round(tiley2lat(rect.y + rect.height, zoomFactor)/eps)*eps;
+            double lonmin = round(tilex2long(rect.x, zoomFactor)/eps_factor)*eps_factor;
+            double lonmax = round(tilex2long(rect.x + rect.width, zoomFactor)/eps_factor)*eps_factor;
+            double latmin = round(tiley2lat(rect.y, zoomFactor)/eps_factor)*eps_factor;
+            double latmax = round(tiley2lat(rect.y + rect.height, zoomFactor)/eps_factor)*eps_factor;
 
             LLBBox box;
             box.Set(latmin, lonmin, latmax, lonmax);
                 
             LLRegion tileRegion(box);
+            //if(i <= 1)
             covrRegionZoom.Union(tileRegion);
 
             upd++;
@@ -693,7 +697,7 @@ void ChartMBTiles::PrepareTiles()
 
 void ChartMBTiles::FlushTiles( void )
 {
-    if(!bReadyToRender)
+    if(!bReadyToRender || m_tileArray == NULL)
         return;
     for(int iz=0 ; iz < (m_maxZoom - m_minZoom) + 1 ; iz++){
         mbTileZoomDescriptor *tzd = m_tileArray[iz];
@@ -708,9 +712,31 @@ void ChartMBTiles::FlushTiles( void )
             }
             it++;
         }
-         delete tzd;
+        delete tzd;
     }
 }
+
+void ChartMBTiles::FlushTextures( void )
+{
+    if (m_tileArray == NULL) {
+        return;
+    }
+    for(int iz=0 ; iz < (m_maxZoom - m_minZoom) + 1 ; iz++){
+        mbTileZoomDescriptor *tzd = m_tileArray[iz];
+
+        std::unordered_map<unsigned int, mbTileDescriptor *>::iterator it = tzd->tileMap.begin();
+        while(it != tzd->tileMap.end())
+        {
+            mbTileDescriptor *tile = it->second;
+            if( tile ){
+                glDeleteTextures(1, &tile->glTextureName);
+                tile->glTextureName = 0;
+            }
+            it++;
+        }
+    }
+}
+
 
 void ChartMBTiles::PrepareTilesForZoom(int zoomFactor, bool bset_geom)
 {
@@ -746,6 +772,10 @@ bool ChartMBTiles::GetChartExtent(Extent *pext)
 
 void ChartMBTiles::SetColorScheme(ColorScheme cs, bool bApplyImmediate)
 {
+    if(m_global_color_scheme != cs){
+        m_global_color_scheme = cs;
+        FlushTextures();
+    }
 }
 
 
@@ -813,11 +843,50 @@ bool ChartMBTiles::getTileTexture( mbTileDescriptor *tile)
                 
                 int blobWidth = blobImage.GetWidth();
                 int blobHeight = blobImage.GetHeight();
+                unsigned char *imgdata = blobImage.GetData();
+                
+                if( (m_global_color_scheme != GLOBAL_COLOR_SCHEME_RGB) && (m_global_color_scheme != GLOBAL_COLOR_SCHEME_DAY) ){
+                    double dimLevel;
+                    switch( m_global_color_scheme ){
+                        case GLOBAL_COLOR_SCHEME_DUSK: {
+                            dimLevel = 0.8;
+                            break;
+                        }
+                        case GLOBAL_COLOR_SCHEME_NIGHT: {
+                            dimLevel = 0.3;
+                            break;
+                        }
+                        default: {
+                            dimLevel = 1.0;
+                            break;
+                        }
+                    }
+
+//                      for( int iy = 0; iy < blobHeight; iy++ ) {
+//                           for( int ix = 0; ix < blobWidth; ix++ ) {
+//                                  wxImage::RGBValue rgb( blobImage.GetRed( ix, iy ), blobImage.GetGreen( ix, iy ), blobImage.GetBlue( ix, iy ) );
+//                                  wxImage::HSVValue hsv = wxImage::RGBtoHSV( rgb );
+//                                  hsv.value = hsv.value * dimLevel;
+//                                  wxImage::RGBValue nrgb = wxImage::HSVtoRGB( hsv );
+//                                  blobImage.SetRGB( ix, iy, nrgb.red, nrgb.green, nrgb.blue );
+//                           }
+//                      }
+                     
+                     for( int j = 0; j < blobHeight*blobWidth; j++ ){
+                         unsigned char *d = &imgdata[3*j];
+                         wxImage::RGBValue rgb( *d, *(d+1), *(d+2) );
+                         wxImage::HSVValue hsv = wxImage::RGBtoHSV( rgb );
+                         hsv.value = hsv.value * dimLevel;
+                         wxImage::RGBValue nrgb = wxImage::HSVtoRGB( hsv );
+                         *d = nrgb.red; *(d+1) = nrgb.green; *(d+2) = nrgb.blue; 
+                     }
+ 
+                }
+                    
                 
                 int stride = 4;
                 int tex_w = 256;
                 int tex_h = 256;
-                unsigned char *imgdata = blobImage.GetData();
                 if( !imgdata )
                     return false;
                 m_imageType = blobImage.GetType();
@@ -958,7 +1027,7 @@ bool ChartMBTiles::RenderTile( mbTileDescriptor *tile, int zoomLevel, const View
 bool ChartMBTiles::RenderRegionViewOnGL(const wxGLContext &glc, const ViewPort& VPoint, const OCPNRegion &RectRegion, const LLRegion &Region)
 {
     // Do not render if significantly underzoomed
-    if( VPoint.chart_scale > (20 * m_Chart_Scale) )
+    if( VPoint.chart_scale > (20 * OSM_zoomScale[m_minZoom]))
         return true;
     ViewPort vp = VPoint;
 
@@ -966,8 +1035,14 @@ bool ChartMBTiles::RenderRegionViewOnGL(const wxGLContext &glc, const ViewPort& 
     LLRegion screenLLRegion = vp.GetLLRegion( screen_region );
     LLBBox screenBox = screenLLRegion.GetBox();
 
-
-    glChartCanvas::SetClipRegion(vp, m_minZoomRegion);
+    if((m_LonMax - m_LonMin) > 180){     // big chart
+        LLRegion validRegion = m_minZoomRegion;
+        validRegion.Intersect(screenLLRegion);
+        glChartCanvas::SetClipRegion(vp, validRegion);
+    }
+    else
+        glChartCanvas::SetClipRegion(vp, m_minZoomRegion);
+        
     
     /* setup opengl parameters */
     glEnable( GL_TEXTURE_2D );

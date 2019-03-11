@@ -1092,8 +1092,11 @@ void ChartCanvas::ApplyGlobalSettings()
 {
     // GPS compas window
     m_bShowCompassWin = g_bShowCompassWin;
-    if(m_Compass)
+    if(m_Compass){
         m_Compass->Show(m_bShowCompassWin);
+        if(m_bShowCompassWin)
+            m_Compass->UpdateStatus();
+    }
 }
 
 
@@ -2746,8 +2749,8 @@ void ChartCanvas::OnKeyDown( wxKeyEvent &event )
 
     case WXK_F5:
         parent_frame->ToggleColorScheme();
-        SetFocus();             
-        gFrame->Raise();        
+        gFrame->Raise();
+        TriggerDeferredFocus(); 
         break;
 
     case WXK_F6: {
@@ -4336,8 +4339,10 @@ void ChartCanvas::DoZoomCanvas( double factor,  bool can_zoom_to_cursor )
     if(!m_pCurrentStack)
         return;
 
-    m_bShowCompassWin = true;
-    SetShowGPSCompassWindow( true );    // Cancel effects of Ctrl-I
+    if(g_bShowCompassWin){
+        m_bShowCompassWin = true;
+        SetShowGPSCompassWindow( true );    // Cancel effects of Ctrl-I
+    }
 
     /* TODO: queue the quilted loading code to a background thread
        so yield is never called from here, and also rendering is not delayed */
@@ -4961,11 +4966,20 @@ bool ChartCanvas::SetViewPoint( double lat, double lon, double scale_ppm, double
     VPoint.chart_scale = m_canvas_scale_factor / ( scale_ppm );
 
     // recompute cursor position
+    // and send to interested plugins if the mouse is actually in this window
 
-    GetCursorLatLon(&m_cursor_lat, &m_cursor_lon);
-
-    if(g_pi_manager) g_pi_manager->SendCursorLatLonToAllPlugIns( m_cursor_lat, m_cursor_lon );
-
+    const wxPoint pt = wxGetMousePosition();
+    int mouseX = pt.x - GetScreenPosition().x;
+    int mouseY = pt.y - GetScreenPosition().y;
+    if( (mouseX > 0) && (mouseX < VPoint.pix_width) && (mouseY > 0) && (mouseY < VPoint.pix_height)){
+        double lat, lon;
+        GetCanvasPixPoint( mouseX, mouseY, lat, lon );
+        m_cursor_lat = lat;
+        m_cursor_lon = lon;
+        if(g_pi_manager)
+            g_pi_manager->SendCursorLatLonToAllPlugIns( lat,lon );
+    }
+    
     if( !VPoint.b_quilt && m_singleChart ) {
 
         VPoint.SetBoxes();
@@ -6515,7 +6529,7 @@ void ChartCanvas::SetMUIBarPosition()
     //  if MUIBar is active, size the bar
     if(m_muiBar){
         // We precalculate the piano width based on the canvas width
-        int pianoWidth = GetClientSize().x * (g_btouch ? 0.98f : 0.6f);
+        int pianoWidth = GetClientSize().x * (g_btouch ? 0.7f : 0.6f);
 //        if(m_Piano)
 //            pianoWidth = m_Piano->GetWidth();
         
@@ -13072,7 +13086,7 @@ bool ocpnCurtain::ProcessEvent(wxEvent& event)
 }
 #endif
 
-#ifdef __WIN32__
+#ifdef _WIN32
 #include <windows.h>
 
 HMODULE hGDI32DLL;
@@ -13087,7 +13101,7 @@ WORD *g_pSavedGammaMap;
 
 int InitScreenBrightness( void )
 {
-#ifdef __WIN32__
+#ifdef _WIN32
     if( gFrame->GetPrimaryCanvas()->GetglCanvas() && g_bopengl ) {
         HDC hDC;
         BOOL bbr;
@@ -13184,7 +13198,7 @@ int InitScreenBrightness( void )
 
 int RestoreScreenBrightness( void )
 {
-#ifdef __WIN32__
+#ifdef _WIN32
 
     if( g_pSavedGammaMap ) {
         HDC hDC = GetDC( NULL );                                 // Get the full screen DC
@@ -13224,7 +13238,7 @@ int RestoreScreenBrightness( void )
 //    Set brightness. [0..100]
 int SetScreenBrightness( int brightness )
 {
-#ifdef __WIN32__
+#ifdef _WIN32
 
     //    Under Windows, we use the SetDeviceGammaRamp function which exists in some (most modern?) versions of gdi32.dll
     //    Load the required library dll, if not already in place

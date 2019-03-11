@@ -21,33 +21,32 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,  USA.         *
  ***************************************************************************
  */
-#include "config.h"
-#include "SoundFactory.h"
+
+#ifndef __MSW_SOUND_H__
+#define __MSW_SOUND_H__
+
+#include "OCPN_Sound.h"
+
+/**
+ * Sound backend on the windows PlaySound() API.
+ */
+
+class MswSound: public OcpnSound
+{
+
+    public:
+        MswSound() {};
+        ~MswSound() { Stop(); };
+
+        bool Load(const char* path, int deviceIndex = -1) override;
+        bool Play() override;
+        bool Stop() override;
+
+    private:
+        void worker();
+        std::wstring m_path;
+        bool m_isPlaying;
+};
 
 
-#ifdef HAVE_PORTAUDIO
-#include "PortAudioSound.h"
-
-OcpnSound* SoundFactory(void) { return new PortAudioSound(); }
-
-#elif defined(HAVE_SYSTEM_CMD_SOUND)
-#include "SystemCmdSound.h"
-
-OcpnSound* SoundFactory(void) { return new SystemCmdSound(SYSTEM_SOUND_CMD); }
-
-#elif defined(__OCPN__ANDROID__)
-#include "AndroidSound.h"
-
-// TBD...
-
-#elif defined(__WXMSW__)
-#include "MswSound.h"
-
-OcpnSound* SoundFactory(void) { return new MswSound(); }
-
-#else
-#include  "OcpnWxSound.h"
-
-OcpnSound* SoundFactory(void) { return new OcpnWxSound(); }
-
-#endif
+#endif // __MSW_SOUND_H__

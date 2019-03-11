@@ -21,33 +21,56 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,  USA.         *
  ***************************************************************************
  */
-#include "config.h"
-#include "SoundFactory.h"
+#include <thread>
 
+#include <windows.h>
 
-#ifdef HAVE_PORTAUDIO
-#include "PortAudioSound.h"
+#include <wx/string.h>
+#include <wx/log.h>
 
-OcpnSound* SoundFactory(void) { return new PortAudioSound(); }
-
-#elif defined(HAVE_SYSTEM_CMD_SOUND)
-#include "SystemCmdSound.h"
-
-OcpnSound* SoundFactory(void) { return new SystemCmdSound(SYSTEM_SOUND_CMD); }
-
-#elif defined(__OCPN__ANDROID__)
-#include "AndroidSound.h"
-
-// TBD...
-
-#elif defined(__WXMSW__)
 #include "MswSound.h"
 
-OcpnSound* SoundFactory(void) { return new MswSound(); }
 
-#else
-#include  "OcpnWxSound.h"
+bool MswSound::Load(const char* path, int deviceIndex)
+{
+    m_path = wxString(path).ToStdWstring();
+    m_isPlaying = false;
+    m_OK = true;
+    return m_OK;
+}
 
-OcpnSound* SoundFactory(void) { return new OcpnWxSound(); }
 
-#endif
+bool MswSound::Stop(void)
+{
+    m_isPlaying = false;
+    return PlaySound(NULL, NULL, 0);
+}
+
+
+void MswSound::worker(void)
+{
+    wxLogInfo("mswSound::worker()");
+    m_isPlaying = true;
+    PlaySound(m_path.c_str(), NULL, SND_FILENAME);
+    if  (m_onFinished) {
+        m_onFinished(m_callbackData);
+        m_onFinished = 0;
+    }
+    m_isPlaying = false;
+}
+
+
+bool MswSound::Play()
+{
+    wxLogMessage("mswSound::Play()");
+    if( !m_OK || m_isPlaying) {
+        wxLogWarning("MswSound: cannot play: not loaded or busy playing.");
+        return false;
+    }
+    if  (m_onFinished) {
+        std::thread t([this]() { worker(); });
+        t.detach();
+        return true;
+    }
+    return PlaySound(m_path.c_str(), NULL, SND_FILENAME);
+}
