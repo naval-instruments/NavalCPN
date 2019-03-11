@@ -441,7 +441,7 @@ wxString Kml::MakeKmlFromRoute( Route* route, bool insertSeq ) {
     insertQtVlmExtendedData = insertSeq;
     seqCounter = 0;
     TiXmlDocument xmlDoc;
-    wxString name = _("OpenCPN Route");
+    wxString name = _("NavalCPN Route");
     if( route->m_RouteNameString.Length() ) name = route->m_RouteNameString;
     TiXmlElement* document = StandardHead( xmlDoc, name );
 
@@ -486,7 +486,7 @@ wxString Kml::MakeKmlFromRoute( Route* route, bool insertSeq ) {
 
 wxString Kml::MakeKmlFromTrack( Track* track ) {
     TiXmlDocument xmlDoc;
-    wxString name = _("OpenCPN Track");
+    wxString name = _("NavalCPN Track");
     if( track->GetName().Length() ) name = track->GetName();
     TiXmlElement* document = StandardHead( xmlDoc, name );
 
@@ -534,7 +534,7 @@ wxString Kml::MakeKmlFromTrack( Track* track ) {
 
 wxString Kml::MakeKmlFromWaypoint( RoutePoint* routepoint ) {
     TiXmlDocument xmlDoc;
-    wxString name = _("OpenCPN Waypoint");
+    wxString name = _("NavalCPN Waypoint");
     if( routepoint->GetName().Length() ) name = routepoint->GetName();
     TiXmlElement* document = StandardHead( xmlDoc, name );
 
@@ -634,4 +634,3 @@ int KmlFormatDialog::GetSelectedFormat() {
     }
     return 0;
 }
-

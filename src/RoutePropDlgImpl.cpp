@@ -93,7 +93,7 @@ wxString GetDaylightString(int index)
             return _("EvTwilight");
         case 6:
             return _("Nighttime");
-            
+
         default:
             return _T("");
     }
@@ -184,18 +184,18 @@ int getDaylightStatus( double lat, double lon, wxDateTime utcDateTime )
     int n = utcDateTime.GetMinute();
     int s = utcDateTime.GetSecond();
     if( y < 2000 || y > 2100 ) return ( 0 );
-    
+
     double ut = (double) h + (double) n / 60. + (double) s / 3600.;
     double lt = getLMT( ut, lon );
     double rsalt = -0.833;
     double twalt = -12.;
-    
+
     if( lt <= 12. ) {
         double sunrise = getDaylightEvent( lat, lon, +1, rsalt, y, m, d );
         if( sunrise < 0. ) return ( 0 );
         else
             sunrise = getLMT( sunrise, lon );
-        
+
         if( fabs( lt - sunrise ) < 0.15 ) return ( SUNRISE );
         if( lt > sunrise ) return ( DAY );
         double twilight = getDaylightEvent( lat, lon, +1, twalt, y, m, d );
@@ -228,7 +228,7 @@ RoutePropDlgImpl::RoutePropDlgImpl( wxWindow* parent, wxWindowID id, const wxStr
     m_pRoute = NULL;
 
     SetColorScheme(global_color_scheme);
-    
+
     Connect( wxEVT_COMMAND_MENU_SELECTED,
         wxCommandEventHandler(RoutePropDlgImpl::OnRoutePropMenuSelected), NULL, this );
 }
@@ -263,11 +263,11 @@ void RoutePropDlgImpl::UpdatePoints()
     wxDataViewItem selection = m_dvlcWaypoints->GetSelection();
     int selected_row = m_dvlcWaypoints->GetSelectedRow();
     m_dvlcWaypoints->DeleteAllItems();
-    
+
     if( NULL == m_pRoute )
         return;
     wxVector<wxVariant> data;
-    
+
     m_pRoute->UpdateSegmentDistances( m_pRoute->m_PlannedSpeed );           // to fix ETA properties
     m_tcDistance->SetValue(wxString::Format(wxT("%5.1f ") + getUsrDistanceUnit(), toUsrDistance(m_pRoute->m_route_length)));
     m_tcEnroute->SetValue(formatTimeDelta(wxLongLong(m_pRoute->m_route_time)));
@@ -407,13 +407,13 @@ void RoutePropDlgImpl::SetRouteAndUpdate( Route *pR, bool only_points )
 {
     if( NULL == pR )
         return;
- 
+
     if( m_pRoute && m_pRoute != pR ) // We had unsaved changes, but now display another route
         ResetChanges();
-    
+
     m_OrigRoute.m_PlannedDeparture = pR->m_PlannedDeparture;
     m_OrigRoute.m_PlannedSpeed = pR->m_PlannedSpeed;
-    
+
     wxString title = pR->GetName() == wxEmptyString ? _("Route Properties") : pR->GetName();
     if( !pR->m_bIsInLayer )
         SetTitle( title );
@@ -421,12 +421,12 @@ void RoutePropDlgImpl::SetRouteAndUpdate( Route *pR, bool only_points )
         wxString caption( wxString::Format( _T("%s, %s: %s"), title, _("Layer"), GetLayerName( pR->m_LayerID ) ) );
         SetTitle( caption );
     }
-    
+
     //  Fetch any config file values
     if ( !only_points )
     {
         m_tz_selection = 1; // Local PC time by default
-        
+
         if( pR == m_pRoute ) {
             if( !pR->m_PlannedDeparture.IsValid() )
                 pR->m_PlannedDeparture = wxDateTime::Now();
@@ -441,11 +441,11 @@ void RoutePropDlgImpl::SetRouteAndUpdate( Route *pR, bool only_points )
             m_pEnroutePoint = NULL;
             m_bStartNow = false;
         }
-        
+
         m_pRoute = pR;
-        
+
         m_tcPlanSpeed->SetValue(wxString::FromDouble(toUsrSpeed(m_pRoute->m_PlannedSpeed)));
-        
+
         if(m_scrolledWindowLinks){
             wxWindowList kids = m_scrolledWindowLinks->GetChildren();
             for( unsigned int i = 0; i < kids.GetCount(); i++ ) {
@@ -467,7 +467,7 @@ void RoutePropDlgImpl::SetRouteAndUpdate( Route *pR, bool only_points )
                     Hyperlink *link = linknode->GetData();
                     wxString Link = link->Link;
                     wxString Descr = link->DescrText;
-                    
+
                     wxHyperlinkCtrl* ctrl = new wxHyperlinkCtrl( m_scrolledWindowLinks, wxID_ANY, Descr,
                                                                 Link, wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE );
                     ctrl->Connect( wxEVT_COMMAND_HYPERLINK,
@@ -477,7 +477,7 @@ void RoutePropDlgImpl::SetRouteAndUpdate( Route *pR, bool only_points )
                                       wxMouseEventHandler( RoutePropDlgImpl::HyperlinkContextMenu ), NULL, this );
                     }
                     bSizerLinks->Add( ctrl, 0, wxALL, 5 );
-                    
+
                     linknode = linknode->GetNext();
                 }
             }
@@ -485,9 +485,9 @@ void RoutePropDlgImpl::SetRouteAndUpdate( Route *pR, bool only_points )
             m_scrolledWindowLinks->Layout();
             bSizerLinks->Layout();
         }
-        
+
         m_choiceTimezone->SetSelection(m_tz_selection);
-        
+
         // Reorganize dialog for route or track display
         m_tcName->SetValue( m_pRoute->m_RouteNameString );
         m_tcFrom->SetValue( m_pRoute->m_RouteStartString );
@@ -501,7 +501,7 @@ void RoutePropDlgImpl::SetRouteAndUpdate( Route *pR, bool only_points )
             m_tpDepartureTime->SetValue(toUsrDateTime(wxDateTime::Now(), m_tz_selection , m_pRoute->pRoutePointList->GetFirst()->GetData()->m_lon));
         }
     }
-    
+
     if( m_pRoute->m_Colour == wxEmptyString ) {
         m_choiceColor->Select( 0 );
     } else {
@@ -512,23 +512,23 @@ void RoutePropDlgImpl::SetRouteAndUpdate( Route *pR, bool only_points )
             }
         }
     }
-    
+
     for( unsigned int i = 0; i < sizeof( ::StyleValues ) / sizeof(int); i++ ) {
         if( m_pRoute->m_style == ::StyleValues[i] ) {
             m_choiceStyle->Select( i );
             break;
         }
     }
-    
+
     for( unsigned int i = 0; i < sizeof( ::WidthValues ) / sizeof(int); i++ ) {
         if( m_pRoute->m_width == ::WidthValues[i] ) {
             m_choiceWidth->Select( i );
             break;
         }
     }
-    
+
     UpdatePoints();
-    
+
     m_btnSplit->Enable(false);
     m_btnExtend->Enable(IsThisRouteExtendable());
 }
@@ -616,14 +616,14 @@ void RoutePropDlgImpl::WaypointsOnDataViewListCtrlItemValueChanged( wxDataViewEv
     else if( ev_col == COLUMN_ETD ) {
         wxString::const_iterator end;
         wxDateTime etd;
-        
+
         wxString ts = value.GetString();
         if( ts.StartsWith("!") ) {
             ts.Replace("!", wxEmptyString, true);
         }
         ts.Trim(true);
         ts.Trim(false);
-        
+
         if( !etd.ParseDateTime(ts, &end) ) {
             etd = wxInvalidDateTime;
         }
@@ -662,7 +662,7 @@ void RoutePropDlgImpl::OnRoutepropCopyTxtClick( wxCommandEvent& event )
     wxString tab("\t", wxConvUTF8);
     wxString eol("\n", wxConvUTF8);
     wxString csvString;
-    
+
     csvString << this->GetTitle() << eol
     << _("Name") << tab << m_pRoute->m_RouteNameString << eol
     << _("Depart From") << tab << m_pRoute->m_RouteStartString << eol
@@ -671,20 +671,20 @@ void RoutePropDlgImpl::OnRoutepropCopyTxtClick( wxCommandEvent& event )
     << _("Speed (Kts)") << tab << m_tcPlanSpeed->GetValue() << eol
     << _("Departure Time") + _T(" (") + _T(ETA_FORMAT_STR) + _T(")") << tab << GetDepartureTS().Format(ETA_FORMAT_STR) << eol
     << _("Time enroute") << tab << m_tcEnroute->GetValue() << eol << eol;
-    
+
     int noCols;
     int noRows;
     noCols = m_dvlcWaypoints->GetColumnCount();
     noRows = m_dvlcWaypoints->GetItemCount();
     wxListItem item;
     item.SetMask( wxLIST_MASK_TEXT );
-    
+
     for( int i = 0; i < noCols; i++ ) {
         wxDataViewColumn* col = m_dvlcWaypoints->GetColumn(i);
         csvString << col->GetTitle() << tab;
     }
     csvString << eol;
-    
+
     wxVariant value;
     for( int j = 0; j < noRows; j++ ) {
         for( int i = 0; i < noCols; i++ ) {
@@ -693,7 +693,7 @@ void RoutePropDlgImpl::OnRoutepropCopyTxtClick( wxCommandEvent& event )
         }
         csvString << eol;
     }
-    
+
     if( wxTheClipboard->Open() ) {
         wxTextDataObject* data = new wxTextDataObject;
         data->SetText( csvString );
@@ -711,17 +711,17 @@ void RoutePropDlgImpl::OnRoutePropMenuSelected( wxCommandEvent& event )
         }
         case ID_RCLK_MENU_DELETE: {
             int dlg_return = OCPNMessageBox( this, _("Are you sure you want to remove this waypoint?"),
-                                            _("OpenCPN Remove Waypoint"), (long) wxYES_NO | wxCANCEL | wxYES_DEFAULT );
-            
+                                            _("NavalCPN Remove Waypoint"), (long) wxYES_NO | wxCANCEL | wxYES_DEFAULT );
+
             if( dlg_return == wxID_YES ) {
                 int sel = m_dvlcWaypoints->GetSelectedRow();
                 m_dvlcWaypoints->SelectRow(sel);
-                
+
                 wxDataViewItem selection = m_dvlcWaypoints->GetSelection();
                 RoutePoint *pRP = m_pRoute->GetPoint(static_cast<int>(reinterpret_cast<long long>(selection.GetID())));
-                
+
                 g_pRouteMan->RemovePointFromRoute( pRP, m_pRoute, NULL );
-                
+
                 UpdatePoints();
             }
             break;
@@ -729,7 +729,7 @@ void RoutePropDlgImpl::OnRoutePropMenuSelected( wxCommandEvent& event )
         case ID_RCLK_MENU_EDIT_WP: {
             wxDataViewItem selection = m_dvlcWaypoints->GetSelection();
             RoutePoint *pRP = m_pRoute->GetPoint(static_cast<int>(reinterpret_cast<long long>(selection.GetID())));
-            
+
             RouteManagerDialog::WptShowPropertiesDialog( pRP, this );
             break;
         }
@@ -739,7 +739,7 @@ void RoutePropDlgImpl::OnRoutePropMenuSelected( wxCommandEvent& event )
 void RoutePropDlgImpl::WaypointsOnDataViewListCtrlItemContextMenu( wxDataViewEvent& event )
 {
     wxMenu menu;
-    
+
     if( ! m_pRoute->m_bIsInLayer ) {
 #ifdef __OCPN__ANDROID__
         wxFont *pf = OCPNGetFont(_T("Menu"), 0);
@@ -747,7 +747,7 @@ void RoutePropDlgImpl::WaypointsOnDataViewListCtrlItemContextMenu( wxDataViewEve
         wxMenuItem *editItem = new wxMenuItem(&menu, ID_RCLK_MENU_EDIT_WP, _("Waypoint Properties") + _T("..."));
         editItem->SetFont(*pf);
         menu.Append(editItem);
-        
+
         wxMenuItem *delItem = new wxMenuItem(&menu, ID_RCLK_MENU_DELETE, _("Remove Selected"));
         delItem->SetFont(*pf);
         menu.Append(delItem);
@@ -761,7 +761,7 @@ void RoutePropDlgImpl::WaypointsOnDataViewListCtrlItemContextMenu( wxDataViewEve
 #ifndef __WXQT__
     wxMenuItem* copyItem = menu.Append( ID_RCLK_MENU_COPY_TEXT, _("&Copy all as text") );
 #endif
-    
+
     PopupMenu( &menu );
 }
 
@@ -798,7 +798,7 @@ void RoutePropDlgImpl::SaveChanges()
             default:
                 m_pRoute->m_TimeDisplayFormat = RTE_TIME_DISP_UTC;
         }
-        
+
         pConfig->UpdateRoute( m_pRoute );
         pConfig->UpdateSettings();
         m_pRoute = NULL;
@@ -822,10 +822,10 @@ void RoutePropDlgImpl::BtnsOnOKButtonClick( wxCommandEvent& event )
 void RoutePropDlgImpl::SplitOnButtonClick( wxCommandEvent& event )
 {
     m_btnSplit->Enable( false );
-    
+
     if( m_pRoute->m_bIsInLayer )
         return;
-    
+
     int nSelected = m_dvlcWaypoints->GetSelectedRow() + 1;
     if( ( nSelected > 1 ) && ( nSelected < m_pRoute->GetnPoints() ) ) {
         m_pHead = new Route();
@@ -834,12 +834,12 @@ void RoutePropDlgImpl::SplitOnButtonClick( wxCommandEvent& event )
         m_pTail->CloneRoute( m_pRoute, nSelected, m_pRoute->GetnPoints(), _("_B"), true );
         pRouteList->Append( m_pHead );
         pConfig->AddNewRoute( m_pHead );
-        
+
         pRouteList->Append( m_pTail );
         pConfig->AddNewRoute( m_pTail );
-        
+
         pConfig->DeleteConfigRoute( m_pRoute );
-        
+
         pSelect->DeleteAllSelectableRoutePoints( m_pRoute );
         pSelect->DeleteAllSelectableRouteSegments( m_pRoute );
         g_pRouteMan->DeleteRoute( m_pRoute );
@@ -847,10 +847,10 @@ void RoutePropDlgImpl::SplitOnButtonClick( wxCommandEvent& event )
         pSelect->AddAllSelectableRoutePoints( m_pTail );
         pSelect->AddAllSelectableRouteSegments( m_pHead );
         pSelect->AddAllSelectableRoutePoints( m_pHead );
-        
+
         SetRouteAndUpdate( m_pTail );
         UpdatePoints();
-        
+
         if( pRouteManagerDialog && pRouteManagerDialog->IsShown() )
             pRouteManagerDialog->UpdateRouteListCtrl();
     }
@@ -868,7 +868,7 @@ void RoutePropDlgImpl::PrintOnButtonClick( wxCommandEvent& event )
 void RoutePropDlgImpl::ExtendOnButtonClick( wxCommandEvent& event )
 {
     m_btnExtend->Enable( false );
-    
+
     if( IsThisRouteExtendable() ) {
         int fm = m_pExtendRoute->GetIndexOf( m_pExtendPoint ) + 1;
         int to = m_pExtendRoute->GetnPoints();
@@ -889,10 +889,10 @@ bool RoutePropDlgImpl::IsThisRouteExtendable()
     m_pExtendPoint = NULL;
     if( m_pRoute->m_bRtIsActive || m_pRoute->m_bIsInLayer )
         return false;
-    
+
     RoutePoint *pLastPoint = m_pRoute->GetLastPoint();
     wxArrayPtrVoid *pEditRouteArray;
-    
+
     pEditRouteArray = g_pRouteMan->GetRouteArrayContaining( pLastPoint );
     // remove invisible & own routes from choices
     int i;
@@ -907,14 +907,14 @@ bool RoutePropDlgImpl::IsThisRouteExtendable()
             int nearby_radius_meters = (int) ( 8. / gFrame->GetPrimaryCanvas()->GetCanvasTrueScale() );
             double rlat = pLastPoint->m_lat;
             double rlon = pLastPoint->m_lon;
-            
+
             m_pExtendPoint = pWayPointMan->GetOtherNearbyWaypoint( rlat, rlon,
                 nearby_radius_meters, pLastPoint->m_GUID );
             if( m_pExtendPoint ) {
                 wxArrayPtrVoid *pCloseWPRouteArray = g_pRouteMan->GetRouteArrayContaining( m_pExtendPoint );
                 if( pCloseWPRouteArray ) {
                     pEditRouteArray = pCloseWPRouteArray;
-                    
+
                     // remove invisible & own routes from choices
                     for( i = pEditRouteArray->GetCount(); i > 0; i-- ) {
                         Route *p = (Route *) pEditRouteArray->Item( i - 1 );
@@ -935,7 +935,7 @@ bool RoutePropDlgImpl::IsThisRouteExtendable()
         }
     }
     delete pEditRouteArray;
-    
+
     return false;
 }
 
@@ -953,24 +953,24 @@ wxString RoutePropDlgImpl::MakeTideInfo( wxString stationName, double lat, doubl
     }
     time_t dtmtt = utcTime.FromUTC().GetTicks();
     int ev = ptcmgr->GetNextBigEvent( &dtmtt, stationID );
-    
+
     wxDateTime dtm;
     dtm.Set( dtmtt ).MakeUTC();
-    
+
     wxString tide_form = wxEmptyString;
-    
+
     if( ev == 1 ) {
         tide_form.Append( _T("LW: ") );
     } else if( ev == 2 ) {
         tide_form.Append( _T("HW: ") );
     }
-    
+
     int offset = ptcmgr->GetStationTimeOffset((IDX_entry*)ptcmgr->GetIDX_entry(stationID));
-    
+
     tide_form.Append( toUsrDateTime(dtm, m_tz_selection, lon).Format(ETA_FORMAT_STR) );
     dtm.Add(wxTimeSpan(0, offset, 0));
     tide_form.Append( wxString::Format(_T(" (") + _("Local") + _T(": %s) @ %s"), dtm.Format(ETA_FORMAT_STR), stationName.c_str()) );
-    
+
     return tide_form;
 }
 
@@ -978,7 +978,7 @@ void RoutePropDlgImpl::ItemEditOnMenuSelection( wxCommandEvent& event )
 {
     wxString findurl = m_pEditedLink->GetURL();
     wxString findlabel = m_pEditedLink->GetLabel();
-    
+
     LinkPropImpl* LinkPropDlg = new LinkPropImpl( this );
     LinkPropDlg->m_textCtrlLinkDescription->SetValue( findlabel );
     LinkPropDlg->m_textCtrlLinkUrl->SetValue( findurl );
@@ -1007,7 +1007,7 @@ void RoutePropDlgImpl::ItemEditOnMenuSelection( wxCommandEvent& event )
                     linknode = linknode->GetNext();
                 }
             }
-            
+
             m_scrolledWindowLinks->InvalidateBestSize();
             m_scrolledWindowLinks->Layout();
             bSizerLinks->Layout();
@@ -1026,12 +1026,12 @@ void RoutePropDlgImpl::ItemDeleteOnMenuSelection( wxCommandEvent& event )
     wxHyperlinkListNode* nodeToDelete = NULL;
     wxString findurl = m_pEditedLink->GetURL();
     wxString findlabel = m_pEditedLink->GetLabel();
-    
+
     wxWindowList kids = m_scrolledWindowLinks->GetChildren();
     for( unsigned int i = 0; i < kids.GetCount(); i++ ) {
         wxWindowListNode *node = kids.Item(i);
         wxWindow *win = node->GetData();
-        
+
         if( win->IsKindOf( CLASSINFO(wxHyperlinkCtrl) ) ) {
             ( (wxHyperlinkCtrl*) win )->Disconnect( wxEVT_COMMAND_HYPERLINK,
                 wxHyperlinkEventHandler( RoutePropDlgImpl::OnHyperlinkClick ) );
@@ -1040,7 +1040,7 @@ void RoutePropDlgImpl::ItemDeleteOnMenuSelection( wxCommandEvent& event )
             win->Destroy();
         }
     }
-    
+
     ///    m_scrolledWindowLinks->DestroyChildren();
     int NbrOfLinks = m_pRoute->m_HyperlinkList->GetCount();
     HyperlinkList *hyperlinklist = m_pRoute->m_HyperlinkList;
@@ -1061,7 +1061,7 @@ void RoutePropDlgImpl::ItemDeleteOnMenuSelection( wxCommandEvent& event )
                     wxHyperlinkEventHandler( RoutePropDlgImpl::OnHyperlinkClick ), NULL, this );
                 ctrl->Connect( wxEVT_RIGHT_DOWN,
                     wxMouseEventHandler( RoutePropDlgImpl::HyperlinkContextMenu ), NULL, this );
-                
+
                 bSizerLinks->Add( ctrl, 0, wxALL, 5 );
             }
             linknode = linknode->GetNext();
@@ -1093,12 +1093,12 @@ void RoutePropDlgImpl::AddLinkOnButtonClick( wxCommandEvent& event )
                 wxHyperlinkEventHandler( RoutePropDlgImpl::OnHyperlinkClick ), NULL, this );
             ctrl->Connect( wxEVT_RIGHT_DOWN,
                 wxMouseEventHandler( RoutePropDlgImpl::HyperlinkContextMenu ), NULL, this );
-            
+
             bSizerLinks->Add( ctrl, 0, wxALL, 5 );
             m_scrolledWindowLinks->InvalidateBestSize();
             m_scrolledWindowLinks->Layout();
             bSizerLinks->Layout();
-            
+
             Hyperlink* h = new Hyperlink();
             h->DescrText = LinkPropDlg->m_textCtrlLinkDescription->GetValue();
             h->Link = LinkPropDlg->m_textCtrlLinkUrl->GetValue();
@@ -1132,7 +1132,7 @@ void RoutePropDlgImpl::OnHyperlinkClick( wxHyperlinkEvent& event )
     //
     //    But, we will do this only if the URL contains the anchor point character '#'
     //    What a hack......
-    
+
 #ifdef __WXMSW__
     wxString cc = event.GetURL();
     if( cc.Find( _T("#") ) != wxNOT_FOUND ) {
@@ -1140,14 +1140,14 @@ void RoutePropDlgImpl::OnHyperlinkClick( wxHyperlinkEvent& event )
         if( RegKey.Exists() ) {
             wxString command_line;
             RegKey.QueryValue( wxString( _T("") ), command_line );
-            
+
             //  Remove "
             command_line.Replace( wxString( _T("\"") ), wxString( _T("") ) );
-            
+
             //  Strip arguments
             int l = command_line.Find( _T(".exe") );
             if( wxNOT_FOUND == l ) l = command_line.Find( _T(".EXE") );
-            
+
             if( wxNOT_FOUND != l ) {
                 wxString cl = command_line.Mid( 0, l + 4 );
                 cl += _T(" ");

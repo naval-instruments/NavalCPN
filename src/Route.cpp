@@ -70,7 +70,7 @@ Route::Route()
     pRoutePointList = new RoutePointList;
     m_GUID = pWayPointMan->CreateGUID( NULL );
     m_btemp = false;
-    
+
     m_ArrivalRadius = g_n_arrival_circle_radius;        // Nautical Miles
 
     m_LayerID = 0;
@@ -80,11 +80,11 @@ Route::Route()
 
     m_lastMousePointIndex = 0;
     m_NextLegGreatCircle = false;
-    
+
     m_PlannedSpeed = ROUTE_DEFAULT_SPEED;
     if(g_PlanSpeed != ROUTE_DEFAULT_SPEED)
         m_PlannedSpeed = g_PlanSpeed;
-    
+
     m_PlannedDeparture = RTE_UNDEF_DEPARTURE;
     m_TimeDisplayFormat = RTE_TIME_DISP_PC;
     m_HyperlinkList = new HyperlinkList;
@@ -204,14 +204,14 @@ void Route::Draw( ocpnDC& dc, ChartCanvas *canvas, const LLBBox &box )
         return;
 
     ViewPort vp = canvas->GetVP();
-    
+
     LLBBox test_box = GetBBox();
     if( box.IntersectOut( test_box ) ) // Route is wholly outside window
         return;
 
     int width = g_route_line_width;
     if( m_width != WIDTH_UNDEFINED ) width = m_width;
-    
+
     if( m_bVisible && m_bRtIsSelected ) {
         wxPen spen = *g_pRouteMan->GetSelectedRoutePen();
         spen.SetWidth( width );
@@ -298,11 +298,11 @@ void Route::Draw( ocpnDC& dc, ChartCanvas *canvas, const LLBBox &box )
                     if( rpt1.x < rpt2.x ) adder = (int) pix_full_circle;
                     else
                         adder = -(int) pix_full_circle;
-                    
+
                     float rxd = rpt2.x - ( rpt1.x + adder );
                     float ryd = rpt1.y - rpt2.y;
                     dtest = rxd*rxd + ryd*ryd;
-                    
+
                     if( dp < dtest ) adder = 0;
 
                     RenderSegment( dc, rpt1.x + adder, rpt1.y, rpt2.x, rpt2.y, vp, true, m_hiliteWidth );
@@ -339,17 +339,17 @@ static void TestLongitude(double lon, double min, double max, bool &lonl, bool &
 
 void Route::DrawGLLines( ViewPort &vp, ocpnDC *dc, ChartCanvas *canvas )
 {
-#ifdef ocpnUSE_GL    
+#ifdef ocpnUSE_GL
     float pix_full_circle = WGS84_semimajor_axis_meters * mercator_k0 * 2 * PI * vp.view_scale_ppm;
 
     bool r1valid = false;
     wxPoint2DDouble r1;
     wxPoint2DDouble lastpoint;
-    
+
     wxRoutePointListNode *node = pRoutePointList->GetFirst();
     RoutePoint *prp2 = node->GetData();
     canvas->GetDoubleCanvasPointPix( prp2->m_lat, prp2->m_lon, &lastpoint);
-    
+
     if(GetnPoints() == 1 && dc) { // single point.. make sure it shows up for highlighting
         canvas->GetDoubleCanvasPointPix( prp2->m_lat, prp2->m_lon, &r1);
         dc->DrawLine(r1.m_x, r1.m_y, r1.m_x+2, r1.m_y+2);
@@ -370,7 +370,7 @@ void Route::DrawGLLines( ViewPort &vp, ocpnDC *dc, ChartCanvas *canvas )
         // Provisional, to properly set status of last point in route
         prp2->m_pos_on_screen = false;
         {
-            
+
             wxPoint2DDouble r2;
             canvas->GetDoubleCanvasPointPix( prp2->m_lat, prp2->m_lon, &r2);
             if(std::isnan(r2.m_x)) {
@@ -379,7 +379,7 @@ void Route::DrawGLLines( ViewPort &vp, ocpnDC *dc, ChartCanvas *canvas )
             }
 
             lastpoint = r2;             // For active track segment to ownship
-            
+
             // don't need to perform calculations or render segment
             // if both points are past any edge of the vp
             // TODO: use these optimizations for dc mode
@@ -466,7 +466,7 @@ void Route::DrawGLLines( ViewPort &vp, ocpnDC *dc, ChartCanvas *canvas )
 
     if( !dc )
         glEnd();
-#endif    
+#endif
 }
 
 void Route::DrawGL( ViewPort &vp, ChartCanvas *canvas )
@@ -484,18 +484,18 @@ void Route::DrawGL( ViewPort &vp, ChartCanvas *canvas )
         // TODO this is a little extravagant, assumming a mark is always a large fixed lat/lon extent.
         //  Maybe better to use the mark's drawn box, once it is known.
         if(vp.GetBBox().ContainsMarge(prp->m_lat, prp->m_lon, .5)){
-                
+
             if ( !m_bVisible && prp->m_bKeepXRoute )
                 prp->DrawGL( vp, canvas );
             else if (m_bVisible)
                 prp->DrawGL( vp, canvas );
         }
     }
-    
+
 #endif
 }
 
-    
+
 void Route::DrawGLRouteLines( ViewPort &vp, ChartCanvas *canvas )
 {
 #ifdef ocpnUSE_GL
@@ -510,17 +510,17 @@ void Route::DrawGLRouteLines( ViewPort &vp, ChartCanvas *canvas )
 
         ocpnDC dc;
         dc.SetPen( HiPen );
-        
+
         DrawGLLines(vp, &dc, canvas);
     }
-    
+
     /* determine color and width */
     wxColour col;
 
     int width = g_pRouteMan->GetRoutePen()->GetWidth(); //g_route_line_width;
     if( m_width != wxPENSTYLE_INVALID )
         width = m_width;
-    
+
     if( m_bRtIsActive )
     {
         col = g_pRouteMan->GetActiveRoutePen()->GetColour();
@@ -538,11 +538,11 @@ void Route::DrawGLRouteLines( ViewPort &vp, ChartCanvas *canvas )
             }
         }
     }
-    
+
     wxPenStyle style = wxPENSTYLE_SOLID;
     if( m_style != wxPENSTYLE_INVALID ) style = m_style;
     dc.SetPen( *wxThePenList->FindOrCreatePen( col, width, style ) );
-    
+
     glColor3ub(col.Red(), col.Green(), col.Blue());
     glLineWidth( wxMax( g_GLMinSymbolLineWidth, width ) );
 
@@ -656,18 +656,18 @@ void Route::RenderSegment( ocpnDC& dc, int xa, int ya, int xb, int yb, ViewPort 
 void Route::RenderSegmentArrowsGL( int xa, int ya, int xb, int yb, ViewPort &vp)
 {
 #ifdef ocpnUSE_GL
-    //    Draw a direction arrow        
+    //    Draw a direction arrow
     wxPoint icon[10];
     float icon_scale_factor = 100 * vp.view_scale_ppm;
     icon_scale_factor = fmin ( icon_scale_factor, 1.5 );              // Sets the max size
     icon_scale_factor = fmax ( icon_scale_factor, .10 );
-    
+
     //    Get the absolute line length
     //    and constrain the arrow to be no more than xx% of the line length
     float nom_arrow_size = 20.;
     float max_arrow_to_leg = (float).20;
     float lpp = sqrtf( powf( (float) (xa - xb), 2) + powf( (float) (ya - yb), 2) );
-    
+
     float icon_size = icon_scale_factor * nom_arrow_size;
     if( icon_size > ( lpp * max_arrow_to_leg ) )
         icon_scale_factor = ( lpp * max_arrow_to_leg )
@@ -729,20 +729,20 @@ RoutePoint *Route::InsertPointAfter( RoutePoint *pRP, double rlat, double rlon,
     if( nRP >= GetnPoints() - 1 )
         return NULL;
     nRP++;
-    
+
     RoutePoint *newpoint = new RoutePoint( rlat, rlon, g_default_routepoint_icon,
                                            GetNewMarkSequenced(), wxEmptyString );
     newpoint->m_bIsInRoute = true;
     newpoint->m_bDynamicName = true;
     newpoint->SetNameShown( false );
-    
+
     pRoutePointList->Insert( nRP, newpoint );
-    
+
     if( bRenamePoints ) RenameRoutePoints();
-    
+
     FinalizeForRendering();
     UpdateSegmentDistances();
-    
+
     return ( newpoint );
 }
 
@@ -894,7 +894,7 @@ LLBBox &Route::GetBBox( void )
             wrap += 360;
         else if(data->m_lon - lastlon > 180)
             wrap -= 360;
-        
+
         double lon = data->m_lon + wrap;
 
         if( lon > bbox_lonmax )
@@ -910,7 +910,7 @@ LLBBox &Route::GetBBox( void )
         lastlon = data->m_lon;
         node = node->GetNext();
     }
-    
+
     if(bbox_lonmin < -360)
         bbox_lonmin += 360, bbox_lonmax += 360;
     else if(bbox_lonmax > 360)
@@ -928,7 +928,7 @@ void Route::CalculateDCRect( wxDC& dc_route, ChartCanvas *canvas, wxRect *prect 
 {
     dc_route.ResetBoundingBox();
     dc_route.DestroyClippingRegion();
-    
+
     wxRect update_rect;
 
     // Draw the route in skeleton form on the dc
@@ -948,7 +948,7 @@ void Route::CalculateDCRect( wxDC& dc_route, ChartCanvas *canvas, wxRect *prect 
 
             wxRect r =  prp2->CurrentRect_in_DC ;
             r.Inflate(m_hiliteWidth, m_hiliteWidth);        // allow for large hilite circles at segment ends
-                
+
             update_rect.Union( r );
             node = node->GetNext();
         }
@@ -972,7 +972,7 @@ void Route::UpdateSegmentDistance( RoutePoint *prp0, RoutePoint *prp, double pla
     double br;
     // why are we using mercator rather than great circle here?? [sean 8-11-2015]
     DistanceBearingMercator( slat2, slon2, slat1, slon1, &br, &dd );
-    
+
     prp->SetCourse(br);
     prp->SetDistance(dd);
 
@@ -1151,7 +1151,7 @@ int Route::SendToGPS(const wxString & com_name, bool bsend_waypoints, wxGauge *p
         else
             msg = _("Error on Route Upload.  Please check logfiles...");
 
-        OCPNMessageBox( NULL, msg, _("OpenCPN Info"), wxOK | wxICON_INFORMATION );
+        OCPNMessageBox( NULL, msg, _("NavalCPN Info"), wxOK | wxICON_INFORMATION );
     }
 
     return (result == 0);
@@ -1187,4 +1187,3 @@ bool Route::IsEqualTo( Route *ptargetroute )
 
     return true;                              // success, they are the same
 }
-

@@ -84,9 +84,9 @@ MyTrackPrintout::MyTrackPrintout( std::vector<bool> _toPrintOut,
 
     table.StartFillHeader();
     // setup widths for columns
-    
+
     table << (const char *)wxString(_("Leg")).mb_str();
-    
+
     if ( toPrintOut[ PRINT_POSITION ] ) {
         table << (const char *)wxString(_("Position")).mb_str();
     }
@@ -104,7 +104,7 @@ MyTrackPrintout::MyTrackPrintout( std::vector<bool> _toPrintOut,
     }
 
     table.StartFillWidths();
-    
+
     table << 20;                // "Leg" column
     // setup widths for columns
     if ( toPrintOut[ PRINT_POSITION ] )
@@ -121,7 +121,7 @@ MyTrackPrintout::MyTrackPrintout( std::vector<bool> _toPrintOut,
     table.StartFillData();
     for ( int n = 0; n <= myTrack->GetnPoints(); n++ ) {
         table << lcPoints->OnGetItemText(n, 0); // leg
-        
+
         if ( toPrintOut[ PRINT_POSITION ] ) {
             // lat + lon
             wxString pos = lcPoints->OnGetItemText(n, 3) + _T(" ") + lcPoints->OnGetItemText(n, 4);
@@ -209,9 +209,9 @@ void MyTrackPrintout::DrawPage( wxDC* dc )
 
     int header_textOffsetX = 2;
     int header_textOffsetY = 2;
-    
+
     dc->DrawText( myTrack->GetName(),  150, 20 );
-    
+
     int currentX = marginX;
     int currentY = marginY;
     vector< PrintCell >& header_content = table.GetHeader();
@@ -427,7 +427,7 @@ void TrackPrintSelection::OnTrackpropOkClick( wxCommandEvent& event )
             OCPNMessageBox(
                 NULL,
                 _( "There was a problem printing.\nPerhaps your current printer is not set correctly?" ),
-                _T( "OpenCPN" ), wxOK );
+                _T( "NavalCPN" ), wxOK );
         }
     }
 
