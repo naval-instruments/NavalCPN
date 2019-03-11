@@ -50,7 +50,7 @@ AboutFrame::AboutFrame( wxWindow* parent, wxWindowID id, const wxString& title, 
 
 	bSizerAbout->Add( m_staticTextOCPN, 0, wxALL, 5 );
 
-	m_staticTextVersion = new wxStaticText( m_scrolledWindowAbout, wxID_ANY, _T("1.0.0"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextVersion = new wxStaticText( m_scrolledWindowAbout, wxID_ANY, _T("0.1.2"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextVersion->Wrap( -1 );
 	m_staticTextVersion->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, wxEmptyString ) );
 
@@ -63,7 +63,7 @@ AboutFrame::AboutFrame( wxWindow* parent, wxWindowID id, const wxString& title, 
 	m_staticTextCopyYears->Wrap( -1 );
 	bSizerAuthors1->Add( m_staticTextCopyYears, 0, wxALL, 5 );
 
-	m_hyperlinkAuthors = new wxHyperlinkCtrl( m_scrolledWindowAbout, wxID_ANY, _("Naval Instruments"), wxT("http://naval-instruments.tk"), wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE );
+	m_hyperlinkAuthors = new wxHyperlinkCtrl( m_scrolledWindowAbout, wxID_ANY, _("Naval Instruments"), wxT("http://naval-instruments.ml"), wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE );
 	m_hyperlinkAuthors->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
 
 	bSizerAuthors1->Add( m_hyperlinkAuthors, 0, wxALIGN_CENTER_VERTICAL, 5 );
@@ -82,7 +82,7 @@ AboutFrame::AboutFrame( wxWindow* parent, wxWindowID id, const wxString& title, 
 	m_staticTextHelp->Wrap( -1 );
 	bSizerParticipate->Add( m_staticTextHelp, 0, wxALL|wxTOP, 5 );
 
-	m_hyperlinkDonate = new wxHyperlinkCtrl( m_scrolledWindowAbout, wxID_ANY, _("Donate"), wxT("http://naval-instruments.tk"), wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE );
+	m_hyperlinkDonate = new wxHyperlinkCtrl( m_scrolledWindowAbout, wxID_ANY, _("Donate"), wxT("http://naval-instruments.ml"), wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE );
 	m_hyperlinkDonate->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
 
 	bSizerParticipate->Add( m_hyperlinkDonate, 0, wxALIGN_CENTER_VERTICAL, 5 );
@@ -91,7 +91,7 @@ AboutFrame::AboutFrame( wxWindow* parent, wxWindowID id, const wxString& title, 
 	m_staticTextOr->Wrap( -1 );
 	bSizerParticipate->Add( m_staticTextOr, 0, wxALL, 5 );
 
-	m_hyperlinkGetInvolved = new wxHyperlinkCtrl( m_scrolledWindowAbout, wxID_ANY, _("get involved!"), wxT("https://github.com/RousselotN/NavalInstruments"), wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE );
+	m_hyperlinkGetInvolved = new wxHyperlinkCtrl( m_scrolledWindowAbout, wxID_ANY, _("get involved!"), wxT("https://github.com/naval-instruments"), wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE );
 	m_hyperlinkGetInvolved->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
 
 	bSizerParticipate->Add( m_hyperlinkGetInvolved, 0, wxALIGN_CENTER_VERTICAL, 5 );

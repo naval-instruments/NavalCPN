@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * Project:  OpenCPN
+ * Project:  NavalCPN
  *
  ***************************************************************************
  *   Copyright (C) 2019 by David S. Register                               *
@@ -47,11 +47,11 @@ protected:
 #endif
     void m_htmlWinHelpOnHtmlLinkClicked( wxHtmlLinkEvent& event ) { m_btnBack->Enable(); event.Skip(); }
 
-    
+
 public:
     ~AboutFrameImpl() {};
-    
-    AboutFrameImpl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("About OpenCPN"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxCAPTION|wxCLOSE_BOX|wxFRAME_FLOAT_ON_PARENT|wxFRAME_NO_TASKBAR|wxRESIZE_BORDER|wxTAB_TRAVERSAL );
+
+    AboutFrameImpl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("About NavalCPN"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxCAPTION|wxCLOSE_BOX|wxFRAME_FLOAT_ON_PARENT|wxFRAME_NO_TASKBAR|wxRESIZE_BORDER|wxTAB_TRAVERSAL );
 };
 
 #endif // _ABOUTFRAMEIMPL_H_

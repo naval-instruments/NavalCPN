@@ -5,7 +5,7 @@ Date: 11th March 2019
 ------
 Software info
 ------
-Version: 0.1.2 (unstable)
+Version: 0.1.3 (unstable)
 Used Kernel: 4.99.1508
 Last Kernel: 4.99.1508
 ------
@@ -20,8 +20,8 @@ the kernel of this project is OpenCPN, and we owe them a lot
 of credits for this.
 OpenCPN is an Open-Sourced project, so is NavalCPN. As it is
 under GPLv3, you can freely download the source and reuse it
-at other purpose. There are, however, few conditions to follow
-and you can find them in the LICENSE file.
+at other purposes. There are, however, few conditions to follow
+and you can find them in the LICENSE files.
 
 ----------------------------------------------------------------------
 2.  Overview
