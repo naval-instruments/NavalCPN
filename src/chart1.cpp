@@ -639,7 +639,7 @@ int                       g_n_ownship_min_mm;
 
 double                    g_n_arrival_circle_radius;
 
-
+bool                      g_bNeedDBUpdate;
 bool                      g_bPreserveScaleOnX;
 
 AboutFrameImpl            *g_pAboutDlg;
@@ -905,17 +905,17 @@ int ShowNavWarning()
 {
     wxString msg0(
             _("\n\
-NavalCPN is based on OpenCPN. For more infos, check\n\
-the About frame.\n\
-We, at Naval Instruments, strongly believe that\n\
-traditionnal ways of sailing are both more accurate\n\
-and more enjoyable than a software.\n\
-NavalCPN is a tool to ease your experience. Not to replace it.\n\n\
-NavalCPN must only be used in conjunction with approved \
-paper charts and traditional methods of navigation.\n\n\
-See the GNU General Public License for more details.\n\n\
-DO NOT rely upon NavalCPN for safety of life or property.\n\n\
-Please click \"OK\" to agree and proceed, \"Cancel\" to quit.\n") );
+            NavalCPN is based on OpenCPN. For more infos, check\n\
+            the About frame.\n\
+            We, at Naval Instruments, strongly believe that\n\
+            traditionnal ways of sailing are both more accurate\n\
+            and more enjoyable than a software.\n\
+            NavalCPN is a tool to ease your experience. Not to replace it.\n\n\
+            NavalCPN must only be used in conjunction with approved \
+            paper charts and traditional methods of navigation.\n\n\
+            See the GNU General Public License for more details.\n\n\
+            DO NOT rely upon NavalCPN for safety of life or property.\n\n\
+            Please click \"OK\" to agree and proceed, \"Cancel\" to quit.\n") );
 
     wxString vs =
         wxString::Format(wxT(" .. Version %s"),
@@ -2195,7 +2195,7 @@ bool MyApp::OnInit()
 
     //  Windows installer may have left hints regarding the initial chart dir selection
 #ifdef __WXMSW__
-    if( g_bFirstRun ) {
+    if( g_bFirstRun && (ChartDirArray.GetCount() == 0) ) {
         int ndirs = 0;
 
         wxRegKey RegKey( wxString( _T("HKEY_LOCAL_MACHINE\\SOFTWARE\\NavalCPN") ) );
@@ -2248,75 +2248,9 @@ bool MyApp::OnInit()
 //      Try to load the current chart list Data file
     ChartData = new ChartDB( );
     if (!ChartData->LoadBinary(ChartListFileName, ChartDirArray)) {
-        bDBUpdateInProgress = true;
-
-        if( ChartDirArray.GetCount() ) {
-//              Create and Save a new Chart Database based on the hints given in the config file
-
-            /*
-             wxString msg1(_("OpenCPN needs to update the chart database from config file entries...."));
-
-             OCPNMessageDialog mdlg(gFrame, msg1, wxString(_("OpenCPN Info")),wxICON_INFORMATION | wxOK );
-             int dlg_ret;
-             dlg_ret = mdlg.ShowModal();
-             */
-            delete ChartData;
-            ChartData = new ChartDB( );
-
-            wxString line( _("Rebuilding chart database from configuration file entries...") );
-            /* The following 3 strings are embeded in wxProgressDialog but must be included by xgettext
-             * to be localized properly. See {wxWidgets}src/generic/progdlgg.cpp:190 */
-            wxString dummy1 = _("Elapsed time : ");
-            wxString dummy2 = _("Estimated time : ");
-            wxString dummy3 = _("Remaining time : ");
-//             wxGenericProgressDialog *pprog = new wxGenericProgressDialog( _("OpenCPN Chart Update"), line, 100,
-//                     NULL, wxPD_SMOOTH | wxPD_ELAPSED_TIME | wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME );
-
-            ChartData->Create( ChartDirArray, NULL );
-            ChartData->SaveBinary(ChartListFileName);
-
-            //delete pprog;
-        }
-
-        else            // No chart database, no config hints, so bail to Options....
-        {
-            wxLogMessage(
-                    _T("Chartlist file not found, config chart dir array is empty.  Chartlist target file is:")
-                            + ChartListFileName );
-
-            wxString msg1(
-                    _("No Charts Installed.\nPlease select chart folders in Options > Charts.") );
-
- ///           OCPNMessageBox(gFrame, msg1, wxString( _("OpenCPN Info") ), wxICON_INFORMATION | wxOK );
-
-
-///            gFrame->DoOptionsDialog();
-
-            b_SetInitialPoint = true;
-
-        }
-
-        bDBUpdateInProgress = false;
-
-        //    As a favor to new users, poll the database and
-        //    move the initial viewport so that a chart will come up.
-
-        if( b_SetInitialPoint ) {
-            double clat, clon;
-            if( ChartData->GetCentroidOfLargestScaleChart( &clat, &clon, CHART_FAMILY_RASTER ) ) {
-                gLat = clat;
-                gLon = clon;
-                gFrame->ClearbFollow(gFrame->GetPrimaryCanvas());
-            } else {
-                if( ChartData->GetCentroidOfLargestScaleChart( &clat, &clon, CHART_FAMILY_VECTOR ) ) {
-                    gLat = clat;
-                    gLon = clon;
-                    gFrame->ClearbFollow(gFrame->GetPrimaryCanvas());
-                }
-            }
-        }
-
+        g_bNeedDBUpdate = true;
     }
+
 
     //  Verify any saved chart database startup index
     if(g_restore_dbindex >= 0){
@@ -2329,8 +2263,6 @@ bool MyApp::OnInit()
 
     //  Apply the inital Group Array structure to the chart data base
     ChartData->ApplyGroupArray( g_pGroupArray );
-
-    //pCurrentStack = new ChartStack;
 
 //      All set to go.....
 
@@ -2826,6 +2758,48 @@ void MyFrame::OnSENCEvtThread( OCPN_BUILDSENC_ThreadEvent & event)
             break;
     }
 }
+
+void MyFrame::RebuildChartDatabase()
+{
+    bool b_SetInitialPoint = false;
+
+    //   Build the initial chart dir array
+    ArrayOfCDI ChartDirArray;
+    pConfig->LoadChartDirArray( ChartDirArray );
+
+
+
+        if( ChartDirArray.GetCount() ) {
+//              Create and Save a new Chart Database based on the hints given in the config file
+
+            wxString msg1(_("NavalCPN needs to update the chart database from config file entries...."));
+
+            OCPNMessageDialog mdlg(gFrame, msg1, wxString(_("NavalCPN Info")),wxICON_INFORMATION | wxOK );
+            int dlg_ret;
+            dlg_ret = mdlg.ShowModal();
+
+            delete ChartData;
+            ChartData = new ChartDB( );
+
+            wxString line( _("Rebuilding chart database from configuration file entries...") );
+            /* The following 3 strings are embeded in wxProgressDialog but must be included by xgettext
+             * to be localized properly. See {wxWidgets}src/generic/progdlgg.cpp:190 */
+            wxString dummy1 = _("Elapsed time : ");
+            wxString dummy2 = _("Estimated time : ");
+            wxString dummy3 = _("Remaining time : ");
+            wxGenericProgressDialog *pprog = new wxGenericProgressDialog( _("NavalCPN Chart Update"), line, 100,
+                     NULL, wxPD_SMOOTH | wxPD_ELAPSED_TIME | wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME );
+
+            ChartData->Create( ChartDirArray, pprog );
+            ChartData->SaveBinary(ChartListFileName);
+
+            delete pprog;
+
+            //  Apply the inital Group Array structure to the chart data base
+            ChartData->ApplyGroupArray( g_pGroupArray );
+        }
+}
+
 
 // play an arbitrary number of bells by using 1 and 2 bell sounds
 void MyFrame::OnBellsFinished( wxCommandEvent& event )
@@ -4211,9 +4185,12 @@ void MyFrame::ODoSetSize( void )
 
     //  If global toolbar is shown, reposition it...
     if( g_MainToolbar){
+        wxSize szBefore = g_MainToolbar->GetSize();
         g_MainToolbar->RePosition();
         g_MainToolbar->SetGeometry(false, wxRect());
         g_MainToolbar->Realize();
+        if(szBefore != g_MainToolbar->GetSize())
+            g_MainToolbar->Refresh(true);
     }
 
 //  Update the stored window size
@@ -5507,7 +5484,7 @@ void MyFrame::RegisterGlobalMenuItems()
     nav_menu->Append( ID_MENU_SCALE_OUT, _menuText(_("Smaller Scale Chart"), _T("Ctrl-Right")) );
 #ifndef __WXOSX__
     nav_menu->AppendSeparator();
-    nav_menu->Append( ID_MENU_OQUIT, _menuText(_("Exit OpenCPN"), _T("Ctrl-Q")) );
+    nav_menu->Append( ID_MENU_OQUIT, _menuText(_("Exit NavalCPN"), _T("Ctrl-Q")) );
 #endif
     m_pMenuBar->Append( nav_menu, _("&Navigate") );
 
@@ -5597,8 +5574,8 @@ void MyFrame::RegisterGlobalMenuItems()
 
     m_pMenuBar->Append( tools_menu, _("&Tools") );
     wxMenu* help_menu = new wxMenu();
-    help_menu->Append( wxID_ABOUT, _("About OpenCPN") );
-    help_menu->Append( wxID_HELP, _("OpenCPN Help") );
+    help_menu->Append( wxID_ABOUT, _("About NavalCPN") );
+    help_menu->Append( wxID_HELP, _("NavalCPN Help") );
     m_pMenuBar->Append( help_menu, _("&Help") );
 
 
@@ -6168,8 +6145,8 @@ bool MyFrame::ProcessOptionsDialog( int rr, ArrayOfCDI *pNewDirArray )
     }
 
     if(  rr & STYLE_CHANGED  ) {
-        OCPNMessageBox(NULL, _("Please restart OpenCPN to activate language or style changes."),
-                _("OpenCPN Info"), wxOK | wxICON_INFORMATION );
+        OCPNMessageBox(NULL, _("Please restart NavalCPN to activate language or style changes."),
+                _("NavalCPN Info"), wxOK | wxICON_INFORMATION );
     }
 
     bool b_groupchange = false;
@@ -6471,7 +6448,7 @@ bool MyFrame::UpdateChartDatabaseInplace( ArrayOfCDI &DirArray, bool b_force, bo
 
     wxGenericProgressDialog *pprog = nullptr;
     if( b_prog ) {
-        wxString longmsg = _("OpenCPN Chart Update");
+        wxString longmsg = _("NavalCPN Chart Update");
         longmsg += _T("..........................................................................");
 
         pprog = new wxGenericProgressDialog();
@@ -6479,7 +6456,7 @@ bool MyFrame::UpdateChartDatabaseInplace( ArrayOfCDI &DirArray, bool b_force, bo
         wxFont *qFont = GetOCPNScaledFont(_("Dialog"));
         pprog->SetFont( *qFont );
 
-        pprog->Create( _("OpenCPN Chart Update"), longmsg, 100,
+        pprog->Create( _("NavalCPN Chart Update"), longmsg, 100,
                                           gFrame, wxPD_SMOOTH | wxPD_ELAPSED_TIME | wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME );
 
 
@@ -6619,6 +6596,35 @@ void MyFrame::OnInitTimer(wxTimerEvent& event)
 
             // Set persistent Fullscreen mode
             g_Platform->SetFullscreen(g_bFullscreen);
+
+            // Rebuild chart database, if necessary
+            if(g_bNeedDBUpdate){
+                RebuildChartDatabase();
+                for(unsigned int i=0 ; i < g_canvasArray.GetCount() ; i++){
+                    ChartCanvas *cc = g_canvasArray.Item(i);
+                    if(cc){
+                        cc->SetGroupIndex( 0, false );  //all charts
+                    }
+                }
+
+                //    As a favor to new users, poll the database and
+                //    move the initial viewport so that a chart will come up.
+
+                double clat, clon;
+                if( ChartData->GetCentroidOfLargestScaleChart( &clat, &clon, CHART_FAMILY_RASTER ) ) {
+                    gLat = clat;
+                    gLon = clon;
+                    gFrame->ClearbFollow(gFrame->GetPrimaryCanvas());
+                } else {
+                    if( ChartData->GetCentroidOfLargestScaleChart( &clat, &clon, CHART_FAMILY_VECTOR ) ) {
+                        gLat = clat;
+                        gLon = clon;
+                        gFrame->ClearbFollow(gFrame->GetPrimaryCanvas());
+                    }
+                }
+
+                g_bNeedDBUpdate = false;
+            }
 
             // Load the waypoints.. both of these routines are very slow to execute which is why
             // they have been to defered until here
@@ -8117,7 +8123,7 @@ void MyFrame::DoPrint( void )
     if( !printer.Print( this, &printout, true ) ) {
         if( wxPrinter::GetLastError() == wxPRINTER_ERROR ) OCPNMessageBox(NULL,
                 _("There was a problem printing.\nPerhaps your current printer is not set correctly?"),
-                _T("OpenCPN"), wxOK );
+                _T("NavalCPN"), wxOK );
 //        else
 //            OCPNMessageBox(_T("Print Cancelled"), _T("OpenCPN"), wxOK);
     } else {
@@ -9901,7 +9907,7 @@ ocpnToolBarSimple *MyFrame::CreateMasterToolbar()
 
     tic= new ToolbarItemContainer( ID_ABOUT,
                                    style->GetToolIcon( _T("MUI_help"), TOOLICON_NORMAL),
-                                   wxITEM_NORMAL, _("About OpenCPN"), _T("MUI_help"));
+                                   wxITEM_NORMAL, _("About NavalCPN"), _T("MUI_help"));
     g_MainToolbar->AddToolItem(tic);
 
     //      Add any PlugIn toolbar tools that request default positioning
@@ -10865,12 +10871,12 @@ bool CheckSerialAccess( void )
     if(!result1.size())
         wxExecute(_T("stat -c %G /dev/ttyACM0"), result1);
 
-    wxString msg1 = _("OpenCPN requires access to serial ports to use serial NMEA data.\n");
+    wxString msg1 = _("NavalCPN requires access to serial ports to use serial NMEA data.\n");
     if(!result1.size()) {
         wxString msg = msg1 + _("No Serial Ports can be found on this system.\n\
 You must install a serial port (modprobe correct kernel module) or plug in a usb serial device.\n");
 
-        OCPNMessageBox ( NULL, msg, wxString( _("OpenCPN Info") ), wxICON_INFORMATION | wxOK, 30 );
+        OCPNMessageBox ( NULL, msg, wxString( _("NavalCPN Info") ), wxICON_INFORMATION | wxOK, 30 );
         return false;
     }
 
@@ -10895,7 +10901,7 @@ You must install a serial port (modprobe correct kernel module) or plug in a usb
 
         wxString msg = msg1 + _("\
 You do currently not have permission to access the serial ports on this system.\n\n\
-It is suggested that you exit OpenCPN now,\n\
+It is suggested that you exit NavalCPN now,\n\
 and add yourself to the correct group to enable serial port access.\n\n\
 You may do so by executing the following command from the linux command line:\n\n\
                 sudo usermod -a -G ");
@@ -10905,7 +10911,7 @@ You may do so by executing the following command from the linux command line:\n\
         msg += user;
         msg += _T("\n");
 
-        OCPNMessageBox ( NULL, msg, wxString( _("OpenCPN Info") ), wxICON_INFORMATION | wxOK, 30 );
+        OCPNMessageBox ( NULL, msg, wxString( _("NavalCPN Info") ), wxICON_INFORMATION | wxOK, 30 );
     }
 
 #endif  // (__UNIX__) && !defined(__OCPN__ANDROID__)
