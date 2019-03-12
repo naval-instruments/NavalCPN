@@ -47,6 +47,7 @@
 #include "wx/tokenzr.h"
 #include <wx/mediactrl.h>
 #include "wx/dir.h"
+#include <wx/statline.h>
 
 #if wxCHECK_VERSION(2, 9, \
                     4) /* does this work in 2.8 too.. do we need a test? */
@@ -1253,7 +1254,7 @@ void options::Init(void) {
 static const wxString BAD_ACCESS_MSG = _(  \
 "The device selected is not accessible; NavalCPN will likely not be able\n"\
 "to use this device as-is. You might want to exit NavalCPN, reboot and\n"\
-"retry after creating a file called /etc/udev/rules.d/70-NavalCPN.rules\n"\
+"retry after creating a file called /etc/udev/rules.d/70-opencpn.rules\n"\
 "with the following contents:\n\n"\
 "            KERNEL==\"ttyUSB*\", MODE=\"0666\"\n"\
 "            KERNEL==\"ttyACM*\", MODE=\"0666\"\n"\
@@ -2944,7 +2945,7 @@ void options::CreatePanel_Routes(size_t parent, int border_size,
 
   //  Routes
   wxStaticBox* routeText =
-      new wxStaticBox(itemPanelRoutes, wxID_ANY, _("Routes"));
+      new wxStaticBox(itemPanelRoutes, wxID_ANY, _("New Routes"));
   wxStaticBoxSizer* routeSizer = new wxStaticBoxSizer(routeText, wxVERTICAL);
   Routes->Add(routeSizer, 0, wxGROW | wxALL, border_size);
 
@@ -2994,10 +2995,15 @@ void options::CreatePanel_Routes(size_t parent, int border_size,
                      _("Advance route waypoint on arrival only"));
   routeSizer->Add(pAdvanceRouteWaypointOnArrivalOnly, 0, wxALL, 5);
 
+#ifdef __WXGTK__
+  Routes->AddSpacer(8 * group_item_spacing);
+  wxStaticLine *pln = new wxStaticLine( itemPanelRoutes, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
+  Routes->Add(pln, 0, wxEXPAND);
+#endif
 
   //  Waypoints
   wxStaticBox* waypointText =
-      new wxStaticBox(itemPanelRoutes, wxID_ANY, _("Waypoints"));
+      new wxStaticBox(itemPanelRoutes, wxID_ANY, _("New Waypoints"));
   wxStaticBoxSizer* waypointSizer =
       new wxStaticBoxSizer(waypointText, wxVERTICAL);
   Routes->Add(waypointSizer, 0, wxTOP | wxALL | wxEXPAND, border_size);
@@ -3103,6 +3109,12 @@ void options::CreatePanel_Routes(size_t parent, int border_size,
 
 
   // Control Options
+
+#ifdef __WXGTK__
+    Routes->AddSpacer(8 * group_item_spacing);
+    wxStaticLine *pln1 = new wxStaticLine( itemPanelRoutes, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
+    Routes->Add(pln1, 0, wxEXPAND);
+#endif
 
     wxStaticBox* waypointControl =
         new wxStaticBox(itemPanelRoutes, wxID_ANY, _("Control Options"));
@@ -8012,8 +8024,8 @@ void options::DoOnPageChange(size_t page) {
       for (int it = 1; it < nLang; it++) {
         if (wxLocale::IsAvailable(lang_list[it])) {
           wxLocale ltest(lang_list[it], 0);
-          ltest.AddCatalog(_T("opencpn"));
-          if (!ltest.IsLoaded(_T("opencpn"))) continue;
+          ltest.AddCatalog(_T("NavalCPN"));
+          if (!ltest.IsLoaded(_T("NavalCPN"))) continue;
 
           // Defaults
           wxString loc_lang_name = wxLocale::GetLanguageName(lang_list[it]);
@@ -8049,11 +8061,11 @@ void options::DoOnPageChange(size_t page) {
           ltest.AddCatalogLookupPathPrefix(wxStandardPaths::Get().GetInstallPrefix() + _T( "/share/locale" ) );
 #endif
 #endif
-          ltest.AddCatalog(_T("opencpn"));
+          ltest.AddCatalog(_T("NavalCPN"));
 
           wxLog::EnableLogging(TRUE);
 
-          if (ltest.IsLoaded(_T("opencpn"))) {
+          if (ltest.IsLoaded(_T("NavalCPN"))) {
             wxString s0 =
                 wxLocale::GetLanguageInfo(lang_list[it])->CanonicalName;
             wxString sl = wxLocale::GetLanguageName(lang_list[it]);
@@ -8086,7 +8098,7 @@ void options::DoOnPageChange(size_t page) {
       plocale_def_lang = new wxLocale(current_language);
 
       setlocale(LC_NUMERIC, "C");
-      plocale_def_lang->AddCatalog(_T("opencpn"));
+      plocale_def_lang->AddCatalog(_T("NavalCPN"));
 
       m_itemLangListBox->SetStringSelection(current_sel);
 
