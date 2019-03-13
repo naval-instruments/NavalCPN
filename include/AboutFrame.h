@@ -86,8 +86,9 @@ class AboutFrame : public wxFrame
 
 	public:
 
-		AboutFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("About NavalCPN"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxCAPTION|wxCLOSE_BOX|wxFRAME_FLOAT_ON_PARENT|wxFRAME_NO_TASKBAR|wxRESIZE_BORDER|wxTAB_TRAVERSAL );
+		AboutFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("About OpenCPN"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxCAPTION|wxCLOSE_BOX|wxFRAME_FLOAT_ON_PARENT|wxFRAME_NO_TASKBAR|wxRESIZE_BORDER|wxTAB_TRAVERSAL );
 
 		~AboutFrame();
 
 };
+

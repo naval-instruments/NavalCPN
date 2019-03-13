@@ -2144,7 +2144,7 @@ void PlugInManager::SendS52ConfigToAllPlugIns( bool bReconfig )
 //         v[_T("OpenCPN S52PLIB ShowLights")] = !ps52plib->GetLightsOff();
         v[_T("NavalCPN S52PLIB ShowAnchorConditions")] = ps52plib->GetAnchorOn();
         v[_T("NavalCPN S52PLIB ShowQualityOfData")] = ps52plib->GetQualityOfData();
-//         v[_T("OpenCPN S52PLIB DisplayCategory")] = ps52plib->GetDisplayCategory();
+//         v[_T("NavalCPN S52PLIB DisplayCategory")] = ps52plib->GetDisplayCategory();
 
         // Global parameters
         v[_T("NavalCPN S52PLIB MetaDisplay")] = ps52plib->m_bShowMeta;

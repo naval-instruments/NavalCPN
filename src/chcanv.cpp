@@ -1258,6 +1258,8 @@ void ChartCanvas::canvasRefreshGroupIndex( void )
 
 void ChartCanvas::SetGroupIndex( int index, bool autoSwitch )
 {
+    SetAlertString(_T(""));
+
     int new_index = index;
     if( index > (int) g_pGroupArray->GetCount() )
         new_index = 0;
@@ -4606,7 +4608,7 @@ void ChartCanvas::UpdateFollowButtonState( void )
    }
 }
 
-void ChartCanvas::JumpToPosition( double lat, double lon, double scale )
+void ChartCanvas::JumpToPosition( double lat, double lon, double scale_ppm )
 {
     if (lon > 180.0)
         lon -= 360.0;
@@ -4619,9 +4621,14 @@ void ChartCanvas::JumpToPosition( double lat, double lon, double scale )
         double skew = 0;
         if(m_singleChart)
             skew = m_singleChart->GetChartSkew() * PI / 180.;
-        SetViewPoint( lat, lon, scale, skew, GetVPRotation() );
+        SetViewPoint( lat, lon, scale_ppm, skew, GetVPRotation() );
     } else {
-        SetViewPoint( lat, lon, scale, 0, GetVPRotation() );
+        if (scale_ppm != GetVPScale()) {
+            // XXX should be done in SetViewPoint
+            VPoint.chart_scale = m_canvas_scale_factor / ( scale_ppm );
+            AdjustQuiltRefChart();
+        }
+        SetViewPoint( lat, lon, scale_ppm, 0, GetVPRotation() );
     }
 
     ReloadVP();
@@ -4775,7 +4782,7 @@ double ChartCanvas::GetBestStartScale(int dbi_hint, const ViewPort &vp)
 
 //      Verify and adjust the current reference chart,
 //      so that it will not lead to excessive overzoom or underzoom onscreen
-int ChartCanvas::AdjustQuiltRefChart( void )
+int ChartCanvas::AdjustQuiltRefChart()
 {
     int ret = -1;
     if(m_pQuilt){
@@ -10181,6 +10188,26 @@ void ChartCanvas::OnPaint( wxPaintEvent& event )
         }
     }
 
+
+// Any MBtiles?
+    std::vector<int> stackIndexArray = m_pQuilt->GetExtendedStackIndexArray();
+    unsigned int im = stackIndexArray.size();
+    if( VPoint.b_quilt && im > 0 ) {
+
+        std::vector<int> tiles_to_show;
+        for( unsigned int is = 0; is < im; is++ ) {
+            const ChartTableEntry &cte = ChartData->GetChartTableEntry( stackIndexArray[is] );
+            if(std::find(g_quilt_noshow_index_array.begin(), g_quilt_noshow_index_array.end(), stackIndexArray[is]) != g_quilt_noshow_index_array.end()) {
+                continue;
+            }
+            if(cte.GetChartType() == CHART_TYPE_MBTILES){
+                tiles_to_show.push_back(stackIndexArray[is]);
+            }
+        }
+
+        if(tiles_to_show.size())
+            SetAlertString( _("MBTile requires OpenGL to be enabled"));
+    }
 
 //    Draw the rest of the overlay objects directly on the scratch dc
     ocpnDC scratch_dc( mscratch_dc );

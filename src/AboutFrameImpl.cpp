@@ -1,8 +1,8 @@
 /***************************************************************************
  *
- * Project:  NavalCPN
+ * Project:  OpenCPN
  * Purpose:  About Dialog
- * Author:   Nathan Rousselot
+ * Author:   David Register
  *
  ***************************************************************************
  *   Copyright (C) 2019 by David S. Register                               *
@@ -55,8 +55,11 @@ AboutFrameImpl::AboutFrameImpl( wxWindow* parent, wxWindowID id, const wxString&
     wxBitmap logo(wxString::Format("%s/opencpn.png", g_Platform->GetSharedDataDir().c_str()), wxBITMAP_TYPE_ANY);
 
     m_hyperlinkHelp->SetURL(wxString::Format("file://%s/doc/help_en_US.html", g_Platform->GetSharedDataDir().c_str()));
+#ifdef OCPN_USE_WEBVIEW
+    m_htmlWinHelp->LoadURL(wxString::Format("file://%s/doc/help_en_US.html", g_Platform->GetSharedDataDir().c_str()));
+#else
     m_htmlWinHelp->LoadFile(wxString::Format("%s/doc/help_en_US.html", g_Platform->GetSharedDataDir().c_str()));
-
+#endif
     m_bitmapLogo->SetBitmap(logo);
 
     int width = m_scrolledWindowAbout->GetSizer()->GetSize().GetWidth() + m_bitmapLogo->GetSize().GetWidth() + EXTEND_WIDTH;
@@ -74,11 +77,11 @@ void AboutFrameImpl::OnLinkHelp( wxHyperlinkEvent& event )
     wxString testFile = wxString::Format("/%s/doc/help_en_US.html", g_Platform->GetSharedDataDir().c_str());
     if( !::wxFileExists(testFile)){
         wxString msg = _("NavalCPN Help documentation is not available locally.");  msg += _T("\n");
-        msg += _("Would you like to visit the naval-instruments.ml website for more information?");
+        msg += _("Would you like to visit the opencpn.org website for more information?");
 
         if( wxID_YES == OCPNMessageBox(NULL, msg, _("NavalCPN Info"), wxYES_NO | wxCENTER, 60 ) )
         {
-            wxLaunchDefaultBrowser(_T("http://naval-instruments.ml"));
+            wxLaunchDefaultBrowser(_T("https://NavalCPN.org"));
         }
     }
     else
@@ -89,7 +92,11 @@ void AboutFrameImpl::OnLinkHelp( wxHyperlinkEvent& event )
         m_htmlWinHelp->Show();
         m_scrolledWindowAbout->Hide();
         m_btnBack->Show();
+#ifdef OCPN_USE_WEBVIEW
+        m_btnBack->Enable(m_htmlWinHelp->CanGoBack());
+#else
         m_btnBack->Enable(m_htmlWinHelp->HistoryCanBack());
+#endif
         SetSize(m_parent->GetSize());
         Centre();
     }

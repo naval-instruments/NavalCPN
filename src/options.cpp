@@ -1254,7 +1254,7 @@ void options::Init(void) {
 static const wxString BAD_ACCESS_MSG = _(  \
 "The device selected is not accessible; NavalCPN will likely not be able\n"\
 "to use this device as-is. You might want to exit NavalCPN, reboot and\n"\
-"retry after creating a file called /etc/udev/rules.d/70-opencpn.rules\n"\
+"retry after creating a file called /etc/udev/rules.d/70-NavalCPN.rules\n"\
 "with the following contents:\n\n"\
 "            KERNEL==\"ttyUSB*\", MODE=\"0666\"\n"\
 "            KERNEL==\"ttyACM*\", MODE=\"0666\"\n"\
@@ -1267,7 +1267,7 @@ static const wxString BAD_ACCESS_MSG = _(  \
 static const wxString BAD_ACCESS_MSG = _( R"(
 The device selected is not accessible; NavalCPN will likely not be able
 to use this device as-is. You might want to exit NavalCPN, reboot and
-retry after creating a file called /etc/udev/rules.d/70-opencpn.rules
+retry after creating a file called /etc/udev/rules.d/70-NavalCPN.rules
 with the following contents:
 
             KERNEL=="ttyUSB*", MODE="0666"

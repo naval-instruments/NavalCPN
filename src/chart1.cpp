@@ -906,16 +906,16 @@ int ShowNavWarning()
     wxString msg0(
             _("\n\
             NavalCPN is based on OpenCPN. For more infos, check\n\
-            the About frame.\n\
-            We, at Naval Instruments, strongly believe that\n\
-            traditionnal ways of sailing are both more accurate\n\
-            and more enjoyable than a software.\n\
-            NavalCPN is a tool to ease your experience. Not to replace it.\n\n\
-            NavalCPN must only be used in conjunction with approved \
-            paper charts and traditional methods of navigation.\n\n\
-            See the GNU General Public License for more details.\n\n\
-            DO NOT rely upon NavalCPN for safety of life or property.\n\n\
-            Please click \"OK\" to agree and proceed, \"Cancel\" to quit.\n") );
+                        the About frame.\n\
+                        We, at Naval Instruments, strongly believe that\n\
+                        traditionnal ways of sailing are both more accurate\n\
+                        and more enjoyable than a software.\n\
+                        NavalCPN is a tool to ease your experience. Not to replace it.\n\n\
+                        NavalCPN must only be used in conjunction with approved \
+                        paper charts and traditional methods of navigation.\n\n\
+                        See the GNU General Public License for more details.\n\n\
+                        DO NOT rely upon NavalCPN for safety of life or property.\n\n\
+                        Please click \"OK\" to agree and proceed, \"Cancel\" to quit.\n") );
 
     wxString vs =
         wxString::Format(wxT(" .. Version %s"),
@@ -2404,7 +2404,7 @@ extern ocpnGLOptions g_GLOptions;
 
 int MyApp::OnExit()
 {
-    wxLogMessage( _T("navalcpn::MyApp starting exit.") );
+    wxLogMessage( _T("NavalCPN::MyApp starting exit.") );
 
     //  Send current nav status data to log file   // pjotrc 2010.02.09
 
@@ -2466,7 +2466,7 @@ int MyApp::OnExit()
 
     delete pDummyChart;
 
-    wxLogMessage( _T("navalcpn::MyApp exiting cleanly...\n") );
+    wxLogMessage( _T("NavalCPN::MyApp exiting cleanly...\n") );
     wxLog::FlushActive();
 
     g_Platform->CloseLogFile();
@@ -3568,7 +3568,7 @@ void MyFrame::OnCloseWindow( wxCloseEvent& event )
         g_pi_manager->DeactivateAllPlugIns();
     }
 
-    wxLogMessage( _T("navalcpn::MyFrame exiting cleanly.") );
+    wxLogMessage( _T("NavalCPN::MyFrame exiting cleanly.") );
 
     quitflag++;
 
@@ -5749,24 +5749,10 @@ void MyFrame::JumpToPosition( ChartCanvas *cc, double lat, double lon, double sc
 {
     if (lon > 180.0)
         lon -= 360.0;
+    // XXX is vLat/vLon always equal to cc m_vLat, m_vLon after SetViewPoint? Does it matter?
     vLat = lat;
     vLon = lon;
-    cc->StopMovement();
-    cc->m_bFollow = false;
-    cc->UpdateFollowButtonState();
-
-    if( !cc->GetQuiltMode() ) {
-        double skew = 0;
-        if(cc->m_singleChart)
-            skew = cc->m_singleChart->GetChartSkew() * PI / 180.;
-        cc->SetViewPoint( lat, lon, scale, skew, cc->GetVPRotation() );
-    } else {
-        cc->SetViewPoint( lat, lon, scale, 0, cc->GetVPRotation() );
-    }
-
-    cc->ReloadVP();
-
-    cc->SetCanvasToolbarItemState( ID_FOLLOW, false );
+    cc->JumpToPosition(lat, lon, scale);
 
     if( g_pi_manager ) {
         g_pi_manager->SendViewPortToRequestingPlugIns( cc->GetVP() );
@@ -7975,7 +7961,7 @@ bool GetMemoryStatus( int *mem_total, int *mem_used )
            //printf("Bytes in mapped regions (hblkhd):      %d\n", mi.hblkhd);
            //printf("Max. total allocated space (usmblks):  %d\n", mi.usmblks);
            //printf("Free bytes held in fastbins (fsmblks): %d\n", mi.fsmblks);
-           printf("Total allocated space (uordblks):      %d\n", mi.uordblks / 1000);
+           //printf("Total allocated space (uordblks):      %d\n", mi.uordblks / 1000);
            //printf("Total free space (fordblks):           %d\n", mi.fordblks);
            //printf("Topmost releasable block (keepcost):   %d\n", mi.keepcost);
 
