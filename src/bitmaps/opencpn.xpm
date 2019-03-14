@@ -2,7 +2,7 @@
 static const char * opencpn[] = {
 "32 32 57 1",
 " 	c None",
-".	c #FFFFFF",
+".	c None",
 "+	c #2D529A",
 "@	c #2D519A",
 "#	c #2E529A",
