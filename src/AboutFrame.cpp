@@ -50,7 +50,7 @@ AboutFrame::AboutFrame( wxWindow* parent, wxWindowID id, const wxString& title, 
 
 	bSizerAbout->Add( m_staticTextOCPN, 0, wxALL, 5 );
 
-	m_staticTextVersion = new wxStaticText( m_scrolledWindowAbout, wxID_ANY, _T("5.0.0"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextVersion = new wxStaticText( m_scrolledWindowAbout, wxID_ANY, _T("0.2.0"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextVersion->Wrap( -1 );
 	m_staticTextVersion->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, wxEmptyString ) );
 
@@ -59,11 +59,11 @@ AboutFrame::AboutFrame( wxWindow* parent, wxWindowID id, const wxString& title, 
 	wxBoxSizer* bSizerAuthors1;
 	bSizerAuthors1 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_staticTextCopyYears = new wxStaticText( m_scrolledWindowAbout, wxID_ANY, _("(c) 2000-2019"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextCopyYears = new wxStaticText( m_scrolledWindowAbout, wxID_ANY, _("(c) 2019"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextCopyYears->Wrap( -1 );
 	bSizerAuthors1->Add( m_staticTextCopyYears, 0, wxALL, 5 );
 
-	m_hyperlinkAuthors = new wxHyperlinkCtrl( m_scrolledWindowAbout, wxID_ANY, _("The NavalCPN Authors"), wxT("https://opencpn.org"), wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE );
+	m_hyperlinkAuthors = new wxHyperlinkCtrl( m_scrolledWindowAbout, wxID_ANY, _("The NavalCPN Authors"), wxT("http://naval-instruments.ml"), wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE );
 	m_hyperlinkAuthors->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
 
 	bSizerAuthors1->Add( m_hyperlinkAuthors, 0, wxALIGN_CENTER_VERTICAL, 5 );
@@ -71,7 +71,7 @@ AboutFrame::AboutFrame( wxWindow* parent, wxWindowID id, const wxString& title, 
 
 	bSizerAbout->Add( bSizerAuthors1, 0, wxEXPAND, 5 );
 
-	m_staticTextDescription = new wxStaticText( m_scrolledWindowAbout, wxID_ANY, _("NavalCPN is a Free Software project, built by sailors.\nIt is freely available to download and distribute without charge."), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextDescription = new wxStaticText( m_scrolledWindowAbout, wxID_ANY, _("NavalCPN is a Free Software project, built by sailors.\nIt is freely available to download and distribute without charge.\n NavalCPN is a project based on OpenCPN, we invite you to check their work at opencpn.org"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextDescription->Wrap( 380 );
 	bSizerAbout->Add( m_staticTextDescription, 0, wxALL, 5 );
 
@@ -82,7 +82,7 @@ AboutFrame::AboutFrame( wxWindow* parent, wxWindowID id, const wxString& title, 
 	m_staticTextHelp->Wrap( -1 );
 	bSizerParticipate->Add( m_staticTextHelp, 0, wxALL|wxTOP, 5 );
 
-	m_hyperlinkDonate = new wxHyperlinkCtrl( m_scrolledWindowAbout, wxID_ANY, _("Donate"), wxT("https://sourceforge.net/donate/index.php?group_id=180842"), wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE );
+	m_hyperlinkDonate = new wxHyperlinkCtrl( m_scrolledWindowAbout, wxID_ANY, _("Donate (coming soon)"), wxT("http://naval-instruments.ml"), wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE );
 	m_hyperlinkDonate->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
 
 	bSizerParticipate->Add( m_hyperlinkDonate, 0, wxALIGN_CENTER_VERTICAL, 5 );
@@ -91,7 +91,7 @@ AboutFrame::AboutFrame( wxWindow* parent, wxWindowID id, const wxString& title, 
 	m_staticTextOr->Wrap( -1 );
 	bSizerParticipate->Add( m_staticTextOr, 0, wxALL, 5 );
 
-	m_hyperlinkGetInvolved = new wxHyperlinkCtrl( m_scrolledWindowAbout, wxID_ANY, _("get involved!"), wxT("https://github.com/OpenCPN/OpenCPN"), wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE );
+	m_hyperlinkGetInvolved = new wxHyperlinkCtrl( m_scrolledWindowAbout, wxID_ANY, _("get involved!"), wxT("https://github.com/naval-instruments/NavalCPN"), wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE );
 	m_hyperlinkGetInvolved->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
 
 	bSizerParticipate->Add( m_hyperlinkGetInvolved, 0, wxALIGN_CENTER_VERTICAL, 5 );
@@ -167,7 +167,7 @@ AboutFrame::AboutFrame( wxWindow* parent, wxWindowID id, const wxString& title, 
 
 	bSizerLinksInner->Add( 0, 0, 1, wxEXPAND, 5 );
 
-	m_hyperlinkWebsite = new wxHyperlinkCtrl( m_panelMainLinks, wxID_ANY, _("NavalCPN Website"), wxT("https://opencpn.org"), wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE );
+	m_hyperlinkWebsite = new wxHyperlinkCtrl( m_panelMainLinks, wxID_ANY, _("NavalCPN Website"), wxT("http://naval-instruments.ml"), wxDefaultPosition, wxDefaultSize, wxHL_DEFAULT_STYLE );
 
 	m_hyperlinkWebsite->SetNormalColour( wxColour( 255, 255, 255 ) );
 	m_hyperlinkWebsite->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, wxEmptyString ) );

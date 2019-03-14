@@ -41,7 +41,7 @@ extern OCPNPlatform  *g_Platform;
 AboutFrameImpl::AboutFrameImpl( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : AboutFrame( parent, id, title, pos, size, style )
 {
     m_staticTextVersion->SetLabel(VERSION_FULL);
-    m_staticTextCopyYears->SetLabel("\u00A9 2000-2019");
+    m_staticTextCopyYears->SetLabel("\u00A9 2019");
     m_hyperlinkIniFile->SetLabel(g_Platform->GetConfigFileName());
     m_hyperlinkIniFile->SetURL(g_Platform->GetConfigFileName());
     m_hyperlinkLogFile->SetLabel(g_Platform->GetLogFileName());
@@ -77,11 +77,11 @@ void AboutFrameImpl::OnLinkHelp( wxHyperlinkEvent& event )
     wxString testFile = wxString::Format("/%s/doc/help_en_US.html", g_Platform->GetSharedDataDir().c_str());
     if( !::wxFileExists(testFile)){
         wxString msg = _("NavalCPN Help documentation is not available locally.");  msg += _T("\n");
-        msg += _("Would you like to visit the opencpn.org website for more information?");
+        msg += _("Would you like to visit the naval-instruments.ml website for more information?");
 
         if( wxID_YES == OCPNMessageBox(NULL, msg, _("NavalCPN Info"), wxYES_NO | wxCENTER, 60 ) )
         {
-            wxLaunchDefaultBrowser(_T("https://NavalCPN.org"));
+            wxLaunchDefaultBrowser(_T("http://naval-instruments.org"));
         }
     }
     else
