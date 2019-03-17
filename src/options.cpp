@@ -1246,6 +1246,9 @@ void options::Init(void) {
   m_bcompact = true;
 #endif
   pCmdSoundString = NULL;
+
+  m_sconfigSelect_single = NULL;
+  m_sconfigSelect_twovertical = NULL;
 }
 
 #if defined(__GNUC__) && __GNUC__ < 8
@@ -1254,7 +1257,7 @@ void options::Init(void) {
 static const wxString BAD_ACCESS_MSG = _(  \
 "The device selected is not accessible; NavalCPN will likely not be able\n"\
 "to use this device as-is. You might want to exit NavalCPN, reboot and\n"\
-"retry after creating a file called /etc/udev/rules.d/70-NavalCPN.rules\n"\
+"retry after creating a file called /etc/udev/rules.d/70-opencpn.rules\n"\
 "with the following contents:\n\n"\
 "            KERNEL==\"ttyUSB*\", MODE=\"0666\"\n"\
 "            KERNEL==\"ttyACM*\", MODE=\"0666\"\n"\
@@ -1267,7 +1270,7 @@ static const wxString BAD_ACCESS_MSG = _(  \
 static const wxString BAD_ACCESS_MSG = _( R"(
 The device selected is not accessible; NavalCPN will likely not be able
 to use this device as-is. You might want to exit NavalCPN, reboot and
-retry after creating a file called /etc/udev/rules.d/70-NavalCPN.rules
+retry after creating a file called /etc/udev/rules.d/70-opencpn.rules
 with the following contents:
 
             KERNEL=="ttyUSB*", MODE="0666"
@@ -5682,7 +5685,7 @@ void options::CreateControls(void) {
   m_OKButton->SetDefault();
   buttons->Add(m_OKButton, 0, wxALIGN_CENTER_VERTICAL | wxALL, border_size);
 
-  m_CancelButton = new wxButton(itemDialog1, wxID_CANCEL, _("&Cancel"));
+  m_CancelButton = new wxButton(itemDialog1, wxID_CANCEL, _("Cancel"));
   buttons->Add(m_CancelButton, 0, wxALIGN_CENTER_VERTICAL | wxALL, border_size);
 
   m_ApplyButton = new wxButton(itemDialog1, ID_APPLY, _("Apply"));
@@ -7408,6 +7411,7 @@ void options::OnApplyClick(wxCommandEvent& event) {
     TideCurrentDataSet.Add(tcDataSelected->GetString(i));
 
   // Canvas configuration
+  if (event.GetId() != ID_APPLY)                // only on ID_OK
     g_canvasConfig = m_screenConfig;
 
   if (event.GetId() == ID_APPLY) {
@@ -7989,6 +7993,7 @@ void options::OnNBPageChange(wxNotebookEvent& event) {
 }
 
 void options::DoOnPageChange(size_t page) {
+
   unsigned int i = page;
 
   //  Sometimes there is a (-1) page selected.
@@ -7996,6 +8001,13 @@ void options::DoOnPageChange(size_t page) {
       return;
 
   lastPage = i;
+
+  if (0 == i) {  // Display
+    if(m_sconfigSelect_single)
+       m_sconfigSelect_single->Refresh( true );
+    if(m_sconfigSelect_twovertical)
+       m_sconfigSelect_twovertical->Refresh( true );
+  }
 
   //    User selected Chart Page?
   //    If so, build the "Charts" page variants
@@ -8024,8 +8036,8 @@ void options::DoOnPageChange(size_t page) {
       for (int it = 1; it < nLang; it++) {
         if (wxLocale::IsAvailable(lang_list[it])) {
           wxLocale ltest(lang_list[it], 0);
-          ltest.AddCatalog(_T("NavalCPN"));
-          if (!ltest.IsLoaded(_T("NavalCPN"))) continue;
+          ltest.AddCatalog(_T("opencpn"));
+          if (!ltest.IsLoaded(_T("opencpn"))) continue;
 
           // Defaults
           wxString loc_lang_name = wxLocale::GetLanguageName(lang_list[it]);
@@ -8061,11 +8073,11 @@ void options::DoOnPageChange(size_t page) {
           ltest.AddCatalogLookupPathPrefix(wxStandardPaths::Get().GetInstallPrefix() + _T( "/share/locale" ) );
 #endif
 #endif
-          ltest.AddCatalog(_T("NavalCPN"));
+          ltest.AddCatalog(_T("opencpn"));
 
           wxLog::EnableLogging(TRUE);
 
-          if (ltest.IsLoaded(_T("NavalCPN"))) {
+          if (ltest.IsLoaded(_T("opencpn"))) {
             wxString s0 =
                 wxLocale::GetLanguageInfo(lang_list[it])->CanonicalName;
             wxString sl = wxLocale::GetLanguageName(lang_list[it]);
@@ -8098,7 +8110,7 @@ void options::DoOnPageChange(size_t page) {
       plocale_def_lang = new wxLocale(current_language);
 
       setlocale(LC_NUMERIC, "C");
-      plocale_def_lang->AddCatalog(_T("NavalCPN"));
+      plocale_def_lang->AddCatalog(_T("opencpn"));
 
       m_itemLangListBox->SetStringSelection(current_sel);
 
@@ -9486,7 +9498,7 @@ SentenceListDlg::SentenceListDlg(wxWindow* parent, FilterDirection dir,
   m_btnDel->Disable();
   wxStdDialogButtonSizer* btnSizer = new wxStdDialogButtonSizer();
   wxButton* btnOK = new wxButton(this, wxID_OK);
-  wxButton* btnCancel = new wxButton(this, wxID_CANCEL);
+  wxButton* btnCancel = new wxButton(this, wxID_CANCEL, _("Cancel"));
 
   secondSizer->Add(stcSizer, 1, wxALL | wxEXPAND, 5);
   stcSizer->Add(m_clbSentences, 1, wxALL | wxEXPAND, 5);
@@ -9695,7 +9707,7 @@ OpenGLOptionsDlg::OpenGLOptionsDlg(wxWindow* parent)
 
   wxStdDialogButtonSizer* btnSizer = new wxStdDialogButtonSizer();
   btnSizer->AddButton(new wxButton(this, wxID_OK));
-  btnSizer->AddButton(new wxButton(this, wxID_CANCEL));
+  btnSizer->AddButton(new wxButton(this, wxID_CANCEL, _("Cancel")));
   btnSizer->Realize();
 
   mainSizer->AddStretchSpacer();

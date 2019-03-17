@@ -882,7 +882,7 @@ void BuildiENCToolbar( bool bnew )
                 posn.y = 100;
 
                 if(g_MainToolbar)
-                    posn = wxPoint(g_maintoolbar_x + g_MainToolbar->GetSize().x + 2, g_maintoolbar_y );
+                    posn = wxPoint(g_maintoolbar_x + g_MainToolbar->GetSize().x + 4, g_maintoolbar_y );
             }
 
             double tool_scale_factor = g_Platform->GetToolbarScaleFactor( g_GUIScaleFactor );
@@ -906,16 +906,17 @@ int ShowNavWarning()
     wxString msg0(
             _("\n\
             NavalCPN is based on OpenCPN. For more infos, check\n\
-                        the About frame.\n\
-                        We, at Naval Instruments, strongly believe that\n\
-                        traditionnal ways of sailing are both more accurate\n\
-                        and more enjoyable than a software.\n\
-                        NavalCPN is a tool to ease your experience. Not to replace it.\n\n\
-                        NavalCPN must only be used in conjunction with approved \
-                        paper charts and traditional methods of navigation.\n\n\
-                        See the GNU General Public License for more details.\n\n\
-                        DO NOT rely upon NavalCPN for safety of life or property.\n\n\
-                        Please click \"OK\" to agree and proceed, \"Cancel\" to quit.\n") );
+                                    the About frame.\n\
+                                    We, at Naval Instruments, strongly believe that\n\
+                                    traditionnal ways of sailing are both more accurate\n\
+                                    and more enjoyable than a software.\n\
+                                    NavalCPN is a tool to ease your experience. Not to replace it.\n\n\
+                                    NavalCPN must only be used in conjunction with approved \
+                                    paper charts and traditional methods of navigation.\n\n\
+                                    See the GNU General Public License for more details.\n\n\
+                                    DO NOT rely upon NavalCPN for safety of life or property.\n\n\
+                                    Please click \"OK\" to agree and proceed, \"Cancel\" to quit.\n") );
+
 
     wxString vs =
         wxString::Format(wxT(" .. Version %s"),
@@ -2404,7 +2405,7 @@ extern ocpnGLOptions g_GLOptions;
 
 int MyApp::OnExit()
 {
-    wxLogMessage( _T("NavalCPN::MyApp starting exit.") );
+    wxLogMessage( _T("opencpn::MyApp starting exit.") );
 
     //  Send current nav status data to log file   // pjotrc 2010.02.09
 
@@ -2466,7 +2467,7 @@ int MyApp::OnExit()
 
     delete pDummyChart;
 
-    wxLogMessage( _T("NavalCPN::MyApp exiting cleanly...\n") );
+    wxLogMessage( _T("opencpn::MyApp exiting cleanly...\n") );
     wxLog::FlushActive();
 
     g_Platform->CloseLogFile();
@@ -3261,6 +3262,7 @@ void MyFrame::RequestNewToolbars(bool bforcenew)
 
 
     BuildiENCToolbar(bforcenew);
+    PositionIENCToolbar();
 
 #ifdef __OCPN__ANDROID__
     DoChartUpdate();
@@ -3568,7 +3570,7 @@ void MyFrame::OnCloseWindow( wxCloseEvent& event )
         g_pi_manager->DeactivateAllPlugIns();
     }
 
-    wxLogMessage( _T("NavalCPN::MyFrame exiting cleanly.") );
+    wxLogMessage( _T("opencpn::MyFrame exiting cleanly.") );
 
     quitflag++;
 
@@ -3870,6 +3872,8 @@ void MyFrame::OnMove( wxMoveEvent& event )
         g_MainToolbar->Realize();
     }
 
+    PositionIENCToolbar();
+
 //    Somehow, this method does not work right on Windows....
 //      g_nframewin_posx = event.GetPosition().x;
 //      g_nframewin_posy = event.GetPosition().y;
@@ -3884,6 +3888,8 @@ void MyFrame::ProcessCanvasResize( void )
 
     if( console && console->IsShown() )
         PositionConsole();
+
+    PositionIENCToolbar();
 
     TriggerRecaptureTimer();
 }
@@ -6545,6 +6551,16 @@ void MyFrame::DoStackDelta( ChartCanvas *cc, int direction )
     }
 }
 
+void MyFrame::PositionIENCToolbar()
+{
+    if(g_iENCToolbar){
+        wxPoint posn;
+        posn.x = (GetPrimaryCanvas()->GetSize().x - g_iENCToolbar->GetSize().x ) / 2;
+        posn.y = 4;
+        g_iENCToolbar->Move(GetPrimaryCanvas()->ClientToScreen(posn));
+    }
+}
+
 // Defered initialization for anything that is not required to render the initial frame
 // and takes a while to initialize.  This gets opencpn up and running much faster.
 void MyFrame::OnInitTimer(wxTimerEvent& event)
@@ -6837,6 +6853,8 @@ void MyFrame::OnInitTimer(wxTimerEvent& event)
         {
             // Last call....
 
+            PositionIENCToolbar();
+
             g_bDeferredInitDone = true;
 
             for(unsigned int i=0 ; i < g_canvasArray.GetCount() ; i++){
@@ -6937,9 +6955,37 @@ void MyFrame::OnMemFootTimer( wxTimerEvent& event )
 
 int ut_index;
 
+void MyFrame::CheckToolbarPosition()
+{
+#ifdef __WXMAC__
+    // Manage Full Screen mode on Mac Mojave 10.14
+    static bool bMaximized;
+
+    if(IsMaximized() && !bMaximized){
+        bMaximized = true;
+        if(g_MainToolbar){
+            g_MainToolbar->SetYAuxOffset(g_MainToolbar->GetToolSize().y * 15 / 10 );
+            g_MainToolbar->RePosition();
+            g_MainToolbar->Realize();
+        }
+        PositionIENCToolbar();
+    }
+    else if(!IsMaximized() && bMaximized){
+         bMaximized = false;
+         if(g_MainToolbar){
+            g_MainToolbar->SetYAuxOffset(0);
+            g_MainToolbar->SetDockY( -1 );
+            g_MainToolbar->RePosition();
+            g_MainToolbar->Realize();
+        }
+        PositionIENCToolbar();
+    }
+#endif
+}
+
 void MyFrame::OnFrameTimer1( wxTimerEvent& event )
 {
-
+    CheckToolbarPosition();
 
     if( ! g_bPauseTest && (g_unit_test_1 || g_unit_test_2) ) {
 //            if((0 == ut_index) && GetQuiltMode())
