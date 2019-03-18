@@ -917,7 +917,6 @@ int ShowNavWarning()
                                     DO NOT rely upon NavalCPN for safety of life or property.\n\n\
                                     Please click \"OK\" to agree and proceed, \"Cancel\" to quit.\n") );
 
-
     wxString vs =
         wxString::Format(wxT(" .. Version %s"),
             VERSION_FULL);
@@ -8016,7 +8015,7 @@ bool GetMemoryStatus( int *mem_total, int *mem_used )
            if(mem_used)
                *mem_used = mi.uordblks / 1024;
 
-           printf("mem_used (Mb):  %d\n", *mem_used / 1024);
+           //printf("mem_used (Mb):  %d\n", *mem_used / 1024);
 	   return true;
 #endif /* linux */
 
