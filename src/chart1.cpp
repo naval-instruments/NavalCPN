@@ -4230,8 +4230,18 @@ void MyFrame::PositionConsole( void )
     if( NULL == GetPrimaryCanvas() ) return;
     //    Reposition console based on its size and chartcanvas size
     int ccx, ccy, ccsx, ccsy, consx, consy;
-    GetPrimaryCanvas()->GetSize( &ccsx, &ccsy );
-    GetPrimaryCanvas()->GetPosition( &ccx, &ccy );
+    ChartCanvas *consoleHost = GetPrimaryCanvas();
+    if(g_canvasConfig > 0)
+        consoleHost = g_canvasArray[1];
+
+    if(consoleHost){
+        consoleHost->GetSize( &ccsx, &ccsy );
+        consoleHost->GetPosition( &ccx, &ccy );
+    }
+    else{
+        GetPrimaryCanvas()->GetSize( &ccsx, &ccsy );
+        GetPrimaryCanvas()->GetPosition( &ccx, &ccy );
+    }
 
     console->GetSize( &consx, &consy );
 
@@ -11558,40 +11568,10 @@ void TimedMessageBox::OnTimer(wxTimerEvent &evt)
 int OCPNMessageBox( wxWindow *parent, const wxString& message, const wxString& caption, int style,
                     int timeout_sec, int x, int y  )
 {
+    int ret =  wxID_OK;
 
-#ifdef __WXOSX__
-    long parent_style;
-    bool b_toolviz = false;
-
-    if(g_MainToolbar && g_MainToolbar->IsShown()){
-        g_MainToolbar->Hide();
-        b_toolviz = true;
-    }
-
-    if(parent) {
-        parent_style = parent->GetWindowStyle();
-        parent->SetWindowStyle( parent_style & !wxSTAY_ON_TOP );
-    }
-
-#endif
-
-      int ret =  wxID_OK;
-
-      TimedMessageBox tbox(parent, message, caption, style, timeout_sec, wxPoint( x, y )  );
-      ret = tbox.GetRetVal() ;
-
-//    wxMessageDialog dlg( parent, message, caption, style | wxSTAY_ON_TOP, wxPoint( x, y ) );
-//    ret = dlg.ShowModal();
-
-#ifdef __WXOSX__
-    if(gFrame && b_toolviz)
-        gFrame->SurfaceAllCanvasToolbars();
-
-    if(parent){
-        parent->Raise();
-        parent->SetWindowStyle( parent_style );
-    }
-#endif
+    TimedMessageBox tbox(parent, message, caption, style, timeout_sec, wxPoint( x, y )  );
+    ret = tbox.GetRetVal() ;
 
     return ret;
 }
