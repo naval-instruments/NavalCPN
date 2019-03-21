@@ -69,7 +69,7 @@ IF (COMMAND cmake_policy)
   endif ()
 ENDIF (COMMAND cmake_policy)
 
-PROJECT(NavalCPN)
+PROJECT(OpenCPN)
 
 SET(CMAKE_VERBOSE_MAKEFILE ON)
 message(STATUS "cmake version: ${CMAKE_VERSION}")
@@ -631,7 +631,7 @@ endif ()
 
 #Enable CrashReporting for Windows (visual studio) and Linux
 IF(MSVC OR (NOT APPLE AND NOT QT_ANDROID AND NOT MINGW))
-    OPTION (OCPN_USE_CRASHREPORT "Enable crash reporting" ON)
+    OPTION (OCPN_USE_CRASHREPORT "Enable crash reporting" OFF)
 ELSE()
     SET(OCPN_USE_CRASHREPORT FALSE)
 ENDIF()
@@ -2197,7 +2197,7 @@ IF(APPLE)
   #  These variables get substituted into the Info.plist template file at build time
   SET(MACOSX_BUNDLE_ICON_FILE opencpn.icns)
   SET(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PACKAGE_VERSION}")
-  SET(MACOSX_BUNDLE_BUNDLE_NAME "NavalCPN")
+  SET(MACOSX_BUNDLE_BUNDLE_NAME "OpenCPN")
   SET(MACOSX_BUNDLE_GUI_IDENTIFIER "org.opencpn")
 
   IF(BUNDLE_DOCS MATCHES "ON")
@@ -2630,23 +2630,23 @@ ENDIF ()
 
 # build a CPack driven installer package
 #include (InstallRequiredSystemLibraries)
-SET(CPACK_PACKAGE_NAME "NavalCPN")
+SET(CPACK_PACKAGE_NAME "OpenCPN")
 SET(CPACK_PACKAGE_VENDOR "opencpn.org")
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "NavalCPN ${PACKAGE_VERSION}")
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "OpenCPN ${PACKAGE_VERSION}")
 SET(CPACK_PACKAGE_VERSION ${PACKAGE_VERSION})
 SET(CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
 SET(CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
 SET(CPACK_PACKAGE_VERSION_PATCH ${VERSION_PATCH}${VERSION_TAIL})
 SET(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_CURRENT_BINARY_DIR};${PACKAGE_NAME};ALL;/")
-SET(CPACK_PACKAGE_EXECUTABLES ${PACKAGE_NAME} "NavalCPN")
+SET(CPACK_PACKAGE_EXECUTABLES ${PACKAGE_NAME} "OpenCPN")
 
 
 IF(WIN32 AND NOT UNIX)
   # There is a bug in NSI that does not handle full unix paths properly. Make
   # sure there is at least one set of four (4) backlasshes.
 
-  SET(CPACK_NSIS_INSTALLED_ICON_NAME "NavalCPN.exe")
-  SET(CPACK_NSIS_PACKAGE_NAME_LC "NavalCPN")
+  SET(CPACK_NSIS_INSTALLED_ICON_NAME "opencpn.exe")
+  SET(CPACK_NSIS_PACKAGE_NAME_LC "opencpn")
 
 #  These lines set the name of the Windows Start Menu shortcut and the icon that goes with it
   SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_NAME} ${PACKAGE_VERSION}")
@@ -2660,12 +2660,12 @@ SET(CPACK_PACKAGE_FILE_NAME "${PACKAGE_NAME}_${VERSION_MAJOR}.${VERSION_MINOR}.$
   SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/data/license.txt")
 
   IF(MINGW)
-    SET(CPACK_STRIP_FILES "bin/NavalCPN")
+    SET(CPACK_STRIP_FILES "bin/opencpn")
   ENDIF(MINGW)
 
 ELSE(WIN32 AND NOT UNIX)
   SET(CPACK_PACKAGE_INSTALL_DIRECTORY ${PACKAGE_NAME})
-  SET(CPACK_STRIP_FILES "bin/NavalCPN")
+  SET(CPACK_STRIP_FILES "bin/opencpn")
   SET(CPACK_SOURCE_STRIP_FILES "")
   SET(CPACK_PACKAGE_FILE_NAME "${PACKAGE_NAME}_${PACKAGE_VERSION}-${PACKAGE_RELEASE}_${ARCH}" )
   SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/data/license.html")
@@ -2717,7 +2717,7 @@ IF(UNIX AND NOT APPLE)
   SET(CPACK_OPENCPN_RPM_LIBDIR "${PREFIX_LIB}")
   SET(CPACK_OPENCPN_RPM_DATADIR "${CMAKE_INSTALL_PREFIX}/${PREFIX_DATA}")
   SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "OpenSource Chart Plotter/Navigator")
-  SET(CPACK_PACKAGE_DESCRIPTION "NavalCPN is a concise ChartPlotter/Navigator. The application supports: GPS/GPDS Position Input, BSB Raster Chart Display, S57 Vector ENChart Display, AIS Input Decoding, Waypoint Autopilot Navigation .")
+  SET(CPACK_PACKAGE_DESCRIPTION "OpenCPN is a concise ChartPlotter/Navigator. The application supports: GPS/GPDS Position Input, BSB Raster Chart Display, S57 Vector ENChart Display, AIS Input Decoding, Waypoint Autopilot Navigation .")
   SET(CPACK_PACKAGE_RELOCATABLE OFF)
   SET(CPACK_SET_DESTDIR ON)
   SET(CPACK_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
@@ -2795,7 +2795,7 @@ IF(APPLE)
 
   ADD_CUSTOM_COMMAND(
 OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}_${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TAIL}.dmg
-COMMAND ${CMAKE_SOURCE_DIR}/buildosx/create-dmg --volname "NavalCPN Installer" --background ${CMAKE_SOURCE_DIR}/buildosx/background.png --window-pos 200 120 --window-size 500 300 --icon-size 80 --icon OpenCPN.app 120 150 --hide-extension OpenCPN.app --app-drop-link 390 145 ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}_${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TAIL}.dmg ${CMAKE_INSTALL_PREFIX}/bin/
+COMMAND ${CMAKE_SOURCE_DIR}/buildosx/create-dmg --volname "OpenCPN Installer" --background ${CMAKE_SOURCE_DIR}/buildosx/background.png --window-pos 200 120 --window-size 500 300 --icon-size 80 --icon OpenCPN.app 120 150 --hide-extension OpenCPN.app --app-drop-link 390 145 ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}_${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TAIL}.dmg ${CMAKE_INSTALL_PREFIX}/bin/
     DEPENDS ${CMAKE_INSTALL_PREFIX}/bin/OpenCPN.app
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "create-dmg [${PACKAGE_NAME}]: Generated dmg file."
